@@ -1,0 +1,19 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: cvmaker-backend
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
+jwt:
+  secret: ${JWT_SECRET:Y2hhbmdlbWVpbnByb2R1Y3Rpb25wbGVhc2VjaGFuZ2VtZQ==}
+  expiration-ms: ${JWT_EXPIRATION_MS:900000}
+  refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}

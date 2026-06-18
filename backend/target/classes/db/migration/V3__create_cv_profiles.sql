@@ -1,0 +1,20 @@
+CREATE TABLE cv.cv_profiles (
+    id             BIGSERIAL PRIMARY KEY,
+    user_id        BIGINT NOT NULL REFERENCES cv.users(id) ON DELETE CASCADE,
+    title          VARCHAR(255) NOT NULL,
+    template_id    VARCHAR(50) NOT NULL DEFAULT 'classic',
+    first_name     VARCHAR(255),
+    last_name      VARCHAR(255),
+    email          VARCHAR(255),
+    phone          VARCHAR(50),
+    location       VARCHAR(255),
+    github         VARCHAR(500),
+    linkedin       VARCHAR(500),
+    portfolio      VARCHAR(500),
+    other_link     VARCHAR(500),
+    summary        TEXT,
+    driver_license VARCHAR(100),
+    is_deleted     BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at     TIMESTAMP NOT NULL DEFAULT NOW()
+);

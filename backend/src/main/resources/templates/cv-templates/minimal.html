@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 22mm 20mm; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10.5pt; color: #333; margin: 0; line-height: 1.5; }
+        h1 { font-size: 22pt; font-weight: 300; letter-spacing: 2px; margin: 0 0 1mm; color: #111; }
+        h2 { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #888; margin: 7mm 0 3mm; border: none; }
+        h3 { font-size: 11pt; font-weight: 600; margin: 0; color: #111; }
+        .contact { font-size: 9pt; color: #888; margin-bottom: 7mm; }
+        .contact a { color: #888; text-decoration: none; }
+        .entry { margin-bottom: 4mm; }
+        .meta { font-size: 9pt; color: #aaa; margin: 0; }
+        p { margin: 1mm 0 0; }
+        ul { margin: 1mm 0 0 4mm; padding: 0; }
+        li { margin-bottom: 0.5mm; }
+        .tags { margin-top: 1mm; font-size: 9pt; color: #aaa; }
+    </style>
+</head>
+<body>
+    <h1 th:text="${cv.firstName} + ' ' + ${cv.lastName}">Full Name</h1>
+    <div class="contact">
+        <span th:if="${cv.email}" th:text="${cv.email}"></span>
+        <span th:if="${cv.phone}">  ·  <span th:text="${cv.phone}"></span></span>
+        <span th:if="${cv.location}">  ·  <span th:text="${cv.location}"></span></span>
+        <span th:if="${cv.github}">  ·  <a th:href="${cv.github}" th:text="${cv.github}"></a></span>
+        <span th:if="${cv.linkedin}">  ·  <a th:href="${cv.linkedin}" th:text="${cv.linkedin}"></a></span>
+    </div>
+
+    <div th:if="${cv.summary}">
+        <h2>About</h2>
+        <p th:text="${cv.summary}"></p>
+    </div>
+
+    <div th:if="${not #lists.isEmpty(cv.experiences)}">
+        <h2>Experience</h2>
+        <div class="entry" th:each="exp : ${cv.experiences}">
+            <h3 th:text="${exp.position} + '  —  ' + ${exp.company}"></h3>
+            <p class="meta" th:text="${exp.startDate} + ' – ' + (${exp.isCurrent} ? 'Present' : ${exp.endDate}) + (${exp.location} ? '  ·  ' + ${exp.location} : '')"></p>
+            <p th:if="${exp.description}" th:text="${exp.description}"></p>
+            <div class="tags" th:if="${not #lists.isEmpty(exp.stack)}" th:text="${#strings.listJoin(exp.stack, '  ·  ')}"></div>
+        </div>
+    </div>
+
+    <div th:if="${not #lists.isEmpty(cv.projects)}">
+        <h2>Projects</h2>
+        <div class="entry" th:each="proj : ${cv.projects}">
+            <h3 th:text="${proj.name}"></h3>
+            <p th:if="${proj.description}" th:text="${proj.description}"></p>
+            <ul th:if="${not #lists.isEmpty(proj.bulletPoints)}">
+                <li th:each="bp : ${proj.bulletPoints}" th:text="${bp}"></li>
+            </ul>
+            <div class="tags" th:if="${not #lists.isEmpty(proj.stack)}" th:text="${#strings.listJoin(proj.stack, '  ·  ')}"></div>
+        </div>
+    </div>
+
+    <div th:if="${not #lists.isEmpty(cv.educations)}">
+        <h2>Education</h2>
+        <div class="entry" th:each="edu : ${cv.educations}">
+            <h3 th:text="${edu.institution}"></h3>
+            <p class="meta" th:if="${edu.degree}" th:text="${edu.degree} + (${edu.fieldOfStudy} ? ', ' + ${edu.fieldOfStudy} : '') + '  ·  ' + ${edu.startDate} + ' – ' + (${edu.isCurrent} ? 'Present' : ${edu.endDate})"></p>
+        </div>
+    </div>
+
+    <div th:if="${not #lists.isEmpty(cv.skills)}">
+        <h2>Skills</h2>
+        <p th:text="${#strings.listJoin(cv.skills.![name], '  ·  ')}"></p>
+    </div>
+
+    <div th:if="${not #lists.isEmpty(cv.languages)}">
+        <h2>Languages</h2>
+        <p th:text="${#strings.listJoin(cv.languages.![language + (level != null ? ' (' + level + ')' : '')], '  ·  ')}"></p>
+    </div>
+</body>
+</html>

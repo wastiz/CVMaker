@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 0; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #333; margin: 0; }
+        table.layout { width: 100%; border-collapse: collapse; }
+        td.sidebar { width: 68mm; background: #2c3e50; color: #ecf0f1; vertical-align: top; padding: 12mm 8mm; }
+        td.main    { vertical-align: top; padding: 12mm 10mm; }
+        .sidebar h1 { font-size: 16pt; color: #fff; margin: 0 0 1mm; font-weight: 700; }
+        .sidebar .role { font-size: 10pt; color: #bdc3c7; margin: 0 0 6mm; }
+        .sidebar h2 { font-size: 8pt; text-transform: uppercase; letter-spacing: 1.5px; color: #7f8c8d; margin: 5mm 0 2mm; }
+        .sidebar p, .sidebar li { font-size: 9pt; color: #bdc3c7; margin: 0 0 1mm; }
+        .sidebar a { color: #bdc3c7; text-decoration: none; word-break: break-all; }
+        .sidebar ul { margin: 0; padding-left: 4mm; }
+        .main h2 { font-size: 10pt; text-transform: uppercase; letter-spacing: 1px; color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 1mm; margin: 0 0 3mm; }
+        .main h3 { font-size: 10.5pt; margin: 0; font-weight: 700; }
+        .entry { margin-bottom: 4mm; }
+        .entry-header { display: table; width: 100%; }
+        .entry-left  { display: table-cell; }
+        .entry-right { display: table-cell; text-align: right; font-size: 9pt; color: #999; white-space: nowrap; }
+        .subtitle { font-size: 9pt; color: #777; margin: 0; }
+        p { margin: 1mm 0 0; }
+        ul.bullets { margin: 1mm 0 0 4mm; padding: 0; }
+        li { margin-bottom: 0.5mm; }
+        .tags { margin-top: 1mm; font-size: 9pt; color: #999; }
+        .section { margin-bottom: 5mm; }
+    </style>
+</head>
+<body>
+<table class="layout">
+<tr>
+    <td class="sidebar">
+        <h1 th:text="${cv.firstName} + ' ' + ${cv.lastName}">Full Name</h1>
+
+        <div th:if="${cv.email}">
+            <h2>Contact</h2>
+            <p th:text="${cv.email}"></p>
+            <p th:if="${cv.phone}" th:text="${cv.phone}"></p>
+            <p th:if="${cv.location}" th:text="${cv.location}"></p>
+            <p th:if="${cv.github}"><a th:href="${cv.github}" th:text="${cv.github}"></a></p>
+            <p th:if="${cv.linkedin}"><a th:href="${cv.linkedin}" th:text="${cv.linkedin}"></a></p>
+            <p th:if="${cv.portfolio}"><a th:href="${cv.portfolio}" th:text="${cv.portfolio}"></a></p>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(cv.skills)}">
+            <h2>Skills</h2>
+            <ul>
+                <li th:each="skill : ${cv.skills}" th:text="${skill.name}"></li>
+            </ul>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(cv.languages)}">
+            <h2>Languages</h2>
+            <ul>
+                <li th:each="lang : ${cv.languages}" th:text="${lang.language} + (${lang.level} ? ' — ' + ${lang.level} : '')"></li>
+            </ul>
+        </div>
+
+        <div th:if="${cv.driverLicense}">
+            <h2>Driver License</h2>
+            <p th:text="${cv.driverLicense}"></p>
+        </div>
+    </td>
+
+    <td class="main">
+        <div class="section" th:if="${cv.summary}">
+            <h2>Summary</h2>
+            <p th:text="${cv.summary}"></p>
+        </div>
+
+        <div class="section" th:if="${not #lists.isEmpty(cv.experiences)}">
+            <h2>Experience</h2>
+            <div class="entry" th:each="exp : ${cv.experiences}">
+                <div class="entry-header">
+                    <div class="entry-left">
+                        <h3 th:text="${exp.position}"></h3>
+                        <p class="subtitle" th:text="${exp.company} + (${exp.location} ? ', ' + ${exp.location} : '')"></p>
+                    </div>
+                    <div class="entry-right">
+                        <span th:text="${exp.startDate} + ' – ' + (${exp.isCurrent} ? 'Present' : ${exp.endDate})"></span>
+                    </div>
+                </div>
+                <p th:if="${exp.description}" th:text="${exp.description}"></p>
+                <div class="tags" th:if="${not #lists.isEmpty(exp.stack)}" th:text="${#strings.listJoin(exp.stack, ' · ')}"></div>
+            </div>
+        </div>
+
+        <div class="section" th:if="${not #lists.isEmpty(cv.projects)}">
+            <h2>Projects</h2>
+            <div class="entry" th:each="proj : ${cv.projects}">
+                <h3 th:text="${proj.name}"></h3>
+                <p th:if="${proj.description}" th:text="${proj.description}"></p>
+                <ul class="bullets" th:if="${not #lists.isEmpty(proj.bulletPoints)}">
+                    <li th:each="bp : ${proj.bulletPoints}" th:text="${bp}"></li>
+                </ul>
+                <div class="tags" th:if="${not #lists.isEmpty(proj.stack)}" th:text="${#strings.listJoin(proj.stack, ' · ')}"></div>
+            </div>
+        </div>
+
+        <div class="section" th:if="${not #lists.isEmpty(cv.educations)}">
+            <h2>Education</h2>
+            <div class="entry" th:each="edu : ${cv.educations}">
+                <div class="entry-header">
+                    <div class="entry-left">
+                        <h3 th:text="${edu.institution}"></h3>
+                        <p class="subtitle" th:if="${edu.degree}" th:text="${edu.degree} + (${edu.fieldOfStudy} ? ', ' + ${edu.fieldOfStudy} : '')"></p>
+                    </div>
+                    <div class="entry-right">
+                        <span th:text="${edu.startDate} + ' – ' + (${edu.isCurrent} ? 'Present' : ${edu.endDate})"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" th:if="${not #lists.isEmpty(cv.certificates)}">
+            <h2>Certificates</h2>
+            <div class="entry" th:each="cert : ${cv.certificates}">
+                <h3 th:text="${cert.name}"></h3>
+                <p class="subtitle" th:if="${cert.issuer}" th:text="${cert.issuer} + (${cert.issueDate} ? ' · ' + ${cert.issueDate} : '')"></p>
+            </div>
+        </div>
+    </td>
+</tr>
+</table>
+</body>
+</html>

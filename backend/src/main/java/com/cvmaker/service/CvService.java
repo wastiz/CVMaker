@@ -1,11 +1,14 @@
 package com.cvmaker.service;
 
-import com.cvmaker.dto.request.CvRequest;
-import com.cvmaker.dto.response.CvListResponse;
+import com.cvmaker.dto.request.CvCreateRequest;
+import com.cvmaker.dto.request.CvUpdateRequest;
 import com.cvmaker.dto.response.CvResponse;
+import com.cvmaker.dto.response.CvSummaryResponse;
 import com.cvmaker.entity.*;
 import com.cvmaker.exception.CvNotFoundException;
+import com.cvmaker.mapper.CvMapper;
 import com.cvmaker.repository.CvRepository;
+import com.cvmaker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,45 +20,78 @@ import java.util.List;
 public class CvService {
 
     private final CvRepository cvRepository;
+    private final UserRepository userRepository;
+    private final CvMapper cvMapper;
 
-    public List<CvListResponse> listCvs(User user) {
-        return cvRepository.findByUserAndDeletedFalseOrderByUpdatedAtDesc(user).stream()
-                .map(cv -> new CvListResponse(cv.getId(), cv.getTitle(), cv.getTemplateId(),
-                        cv.getFirstName(), cv.getLastName(), cv.getUpdatedAt()))
+    @Transactional(readOnly = true)
+    public List<CvSummaryResponse> getAll(Long userId) {
+        return cvRepository.findAllByUserIdAndDeletedFalseOrderByUpdatedAtDesc(userId)
+                .stream()
+                .map(cvMapper::toSummaryResponse)
                 .toList();
     }
 
     @Transactional
-    public CvResponse createCv(User user, CvRequest req) {
-        CvProfile cv = buildProfile(user, req);
+    public CvResponse create(Long userId, CvCreateRequest req) {
+        User user = userRepository.getReferenceById(userId);
+        CvProfile cv = CvProfile.builder()
+                .user(user)
+                .title(req.title())
+                .templateId(req.templateId() != null ? req.templateId() : "classic")
+                .firstName(req.firstName())
+                .lastName(req.lastName())
+                .email(req.email())
+                .phone(req.phone())
+                .location(req.location())
+                .github(req.github())
+                .linkedin(req.linkedin())
+                .portfolio(req.portfolio())
+                .otherLink(req.otherLink())
+                .summary(req.summary())
+                .driverLicense(req.driverLicense())
+                .build();
         cvRepository.save(cv);
-        return toResponse(cv);
+        return cvMapper.toResponse(cv);
     }
 
-    public CvResponse getCv(User user, Long id) {
-        CvProfile cv = findOwned(user, id);
-        return toResponse(cv);
+    @Transactional(readOnly = true)
+    public CvResponse getById(Long userId, Long cvId) {
+        CvProfile cv = findOwnedActive(userId, cvId);
+        return cvMapper.toResponse(cv);
     }
 
     @Transactional
-    public CvResponse updateCv(User user, Long id, CvRequest req) {
-        CvProfile cv = findOwned(user, id);
-        applyFields(cv, req);
-        replaceCollections(cv, req);
+    public CvResponse update(Long userId, Long cvId, CvUpdateRequest req) {
+        CvProfile cv = findOwnedActive(userId, cvId);
+        cv.setTitle(req.title());
+        if (req.templateId() != null) cv.setTemplateId(req.templateId());
+        cv.setFirstName(req.firstName());
+        cv.setLastName(req.lastName());
+        cv.setEmail(req.email());
+        cv.setPhone(req.phone());
+        cv.setLocation(req.location());
+        cv.setGithub(req.github());
+        cv.setLinkedin(req.linkedin());
+        cv.setPortfolio(req.portfolio());
+        cv.setOtherLink(req.otherLink());
+        cv.setSummary(req.summary());
+        cv.setDriverLicense(req.driverLicense());
         cvRepository.save(cv);
-        return toResponse(cv);
+        return cvMapper.toResponse(cv);
     }
 
     @Transactional
-    public void deleteCv(User user, Long id) {
-        CvProfile cv = findOwned(user, id);
+    public void softDelete(Long userId, Long cvId) {
+        CvProfile cv = findOwnedActive(userId, cvId);
         cv.setDeleted(true);
         cvRepository.save(cv);
     }
 
     @Transactional
-    public CvResponse duplicateCv(User user, Long id) {
-        CvProfile src = findOwned(user, id);
+    public CvResponse duplicate(Long userId, Long cvId) {
+        CvProfile src = findOwnedActive(userId, cvId);
+        User user = userRepository.getReferenceById(userId);
+
         CvProfile copy = CvProfile.builder()
                 .user(user)
                 .title(src.getTitle() + " (copy)")
@@ -95,88 +131,11 @@ public class CvService {
                         .issueDate(c.getIssueDate()).url(c.getUrl()).sortOrder(c.getSortOrder()).build()));
 
         cvRepository.save(copy);
-        return toResponse(copy);
+        return cvMapper.toResponse(copy);
     }
 
-    private CvProfile findOwned(User user, Long id) {
-        return cvRepository.findByIdAndUserAndDeletedFalse(id, user)
-                .orElseThrow(() -> new CvNotFoundException(id));
-    }
-
-    private CvProfile buildProfile(User user, CvRequest req) {
-        CvProfile cv = CvProfile.builder()
-                .user(user)
-                .title(req.title())
-                .templateId(req.templateId() != null ? req.templateId() : "classic")
-                .build();
-        applyFields(cv, req);
-        replaceCollections(cv, req);
-        return cv;
-    }
-
-    private void applyFields(CvProfile cv, CvRequest req) {
-        cv.setTitle(req.title());
-        if (req.templateId() != null) cv.setTemplateId(req.templateId());
-        cv.setFirstName(req.firstName());
-        cv.setLastName(req.lastName());
-        cv.setEmail(req.email());
-        cv.setPhone(req.phone());
-        cv.setLocation(req.location());
-        cv.setGithub(req.github());
-        cv.setLinkedin(req.linkedin());
-        cv.setPortfolio(req.portfolio());
-        cv.setOtherLink(req.otherLink());
-        cv.setSummary(req.summary());
-        cv.setDriverLicense(req.driverLicense());
-    }
-
-    private void replaceCollections(CvProfile cv, CvRequest req) {
-        cv.getSkills().clear();
-        if (req.skills() != null) req.skills().forEach(s ->
-                cv.getSkills().add(CvSkill.builder().cvProfile(cv).type(s.type()).name(s.name()).sortOrder(s.sortOrder()).build()));
-
-        cv.getLanguages().clear();
-        if (req.languages() != null) req.languages().forEach(l ->
-                cv.getLanguages().add(CvLanguage.builder().cvProfile(cv).language(l.language()).level(l.level()).sortOrder(l.sortOrder()).build()));
-
-        cv.getExperiences().clear();
-        if (req.experiences() != null) req.experiences().forEach(e ->
-                cv.getExperiences().add(CvExperience.builder().cvProfile(cv).company(e.company()).position(e.position())
-                        .location(e.location()).startDate(e.startDate()).endDate(e.endDate())
-                        .isCurrent(e.isCurrent()).description(e.description()).stack(e.stack())
-                        .sortOrder(e.sortOrder()).build()));
-
-        cv.getProjects().clear();
-        if (req.projects() != null) req.projects().forEach(p ->
-                cv.getProjects().add(CvProject.builder().cvProfile(cv).name(p.name()).url(p.url())
-                        .description(p.description()).bulletPoints(p.bulletPoints()).stack(p.stack())
-                        .sortOrder(p.sortOrder()).build()));
-
-        cv.getEducations().clear();
-        if (req.educations() != null) req.educations().forEach(e ->
-                cv.getEducations().add(CvEducation.builder().cvProfile(cv).institution(e.institution()).degree(e.degree())
-                        .fieldOfStudy(e.fieldOfStudy()).startDate(e.startDate()).endDate(e.endDate())
-                        .isCurrent(e.isCurrent()).description(e.description()).sortOrder(e.sortOrder()).build()));
-
-        cv.getCertificates().clear();
-        if (req.certificates() != null) req.certificates().forEach(c ->
-                cv.getCertificates().add(CvCertificate.builder().cvProfile(cv).name(c.name()).issuer(c.issuer())
-                        .issueDate(c.issueDate()).url(c.url()).sortOrder(c.sortOrder()).build()));
-    }
-
-    CvResponse toResponse(CvProfile cv) {
-        return new CvResponse(
-                cv.getId(), cv.getTitle(), cv.getTemplateId(),
-                cv.getFirstName(), cv.getLastName(), cv.getEmail(), cv.getPhone(),
-                cv.getLocation(), cv.getGithub(), cv.getLinkedin(), cv.getPortfolio(),
-                cv.getOtherLink(), cv.getSummary(), cv.getDriverLicense(),
-                cv.getCreatedAt(), cv.getUpdatedAt(),
-                cv.getSkills().stream().map(s -> new CvResponse.SkillResponse(s.getId(), s.getType(), s.getName(), s.getSortOrder())).toList(),
-                cv.getLanguages().stream().map(l -> new CvResponse.LanguageResponse(l.getId(), l.getLanguage(), l.getLevel(), l.getSortOrder())).toList(),
-                cv.getExperiences().stream().map(e -> new CvResponse.ExperienceResponse(e.getId(), e.getCompany(), e.getPosition(), e.getLocation(), e.getStartDate(), e.getEndDate(), e.isCurrent(), e.getDescription(), e.getStack(), e.getSortOrder())).toList(),
-                cv.getProjects().stream().map(p -> new CvResponse.ProjectResponse(p.getId(), p.getName(), p.getUrl(), p.getDescription(), p.getBulletPoints(), p.getStack(), p.getSortOrder())).toList(),
-                cv.getEducations().stream().map(e -> new CvResponse.EducationResponse(e.getId(), e.getInstitution(), e.getDegree(), e.getFieldOfStudy(), e.getStartDate(), e.getEndDate(), e.isCurrent(), e.getDescription(), e.getSortOrder())).toList(),
-                cv.getCertificates().stream().map(c -> new CvResponse.CertificateResponse(c.getId(), c.getName(), c.getIssuer(), c.getIssueDate(), c.getUrl(), c.getSortOrder())).toList()
-        );
+    private CvProfile findOwnedActive(Long userId, Long cvId) {
+        return cvRepository.findByIdAndUserIdAndDeletedFalse(cvId, userId)
+                .orElseThrow(() -> new CvNotFoundException(cvId));
     }
 }

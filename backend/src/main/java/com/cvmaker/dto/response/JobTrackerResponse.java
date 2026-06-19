@@ -2,8 +2,7 @@ package com.cvmaker.dto.response;
 
 import java.time.LocalDateTime;
 
-public record TrackerResponse(
-        Long id,
+public record JobTrackerResponse(
         int applied,
         int rejections,
         int interviews,

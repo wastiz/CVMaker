@@ -1,9 +1,10 @@
 package com.cvmaker.service;
 
-import com.cvmaker.dto.request.TrackerPatchRequest;
-import com.cvmaker.dto.response.TrackerResponse;
+import com.cvmaker.dto.response.JobTrackerResponse;
 import com.cvmaker.entity.JobTracker;
-import com.cvmaker.entity.User;
+import com.cvmaker.entity.TrackerAction;
+import com.cvmaker.entity.TrackerField;
+import com.cvmaker.exception.JobTrackerNotFoundException;
 import com.cvmaker.repository.JobTrackerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,34 +16,43 @@ public class JobTrackerService {
 
     private final JobTrackerRepository trackerRepository;
 
-    public TrackerResponse getTracker(User user) {
-        JobTracker tracker = findTracker(user);
-        return toResponse(tracker);
+    @Transactional(readOnly = true)
+    public JobTrackerResponse getByUserId(Long userId) {
+        return toResponse(findByUserId(userId));
     }
 
     @Transactional
-    public TrackerResponse patch(User user, TrackerPatchRequest req) {
-        JobTracker tracker = findTracker(user);
-
-        switch (req.field()) {
-            case "applied"     -> tracker.setApplied(Math.max(0, tracker.getApplied() + req.delta()));
-            case "rejections"  -> tracker.setRejections(Math.max(0, tracker.getRejections() + req.delta()));
-            case "interviews"  -> tracker.setInterviews(Math.max(0, tracker.getInterviews() + req.delta()));
-            case "offers"      -> tracker.setOffers(Math.max(0, tracker.getOffers() + req.delta()));
-            default            -> throw new IllegalArgumentException("Unknown field: " + req.field());
-        }
-
+    public JobTrackerResponse increment(Long userId, TrackerField field) {
+        JobTracker tracker = findByUserId(userId);
+        applyDelta(tracker, field, 1);
         trackerRepository.save(tracker);
         return toResponse(tracker);
     }
 
-    private JobTracker findTracker(User user) {
-        return trackerRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalStateException("Tracker not found for user " + user.getId()));
+    @Transactional
+    public JobTrackerResponse decrement(Long userId, TrackerField field) {
+        JobTracker tracker = findByUserId(userId);
+        applyDelta(tracker, field, -1);
+        trackerRepository.save(tracker);
+        return toResponse(tracker);
     }
 
-    private TrackerResponse toResponse(JobTracker t) {
-        return new TrackerResponse(t.getId(), t.getApplied(), t.getRejections(),
+    private void applyDelta(JobTracker tracker, TrackerField field, int delta) {
+        switch (field) {
+            case APPLIED     -> tracker.setApplied(Math.max(0, tracker.getApplied() + delta));
+            case REJECTIONS  -> tracker.setRejections(Math.max(0, tracker.getRejections() + delta));
+            case INTERVIEWS  -> tracker.setInterviews(Math.max(0, tracker.getInterviews() + delta));
+            case OFFERS      -> tracker.setOffers(Math.max(0, tracker.getOffers() + delta));
+        }
+    }
+
+    private JobTracker findByUserId(Long userId) {
+        return trackerRepository.findByUserId(userId)
+                .orElseThrow(() -> new JobTrackerNotFoundException(userId));
+    }
+
+    private JobTrackerResponse toResponse(JobTracker t) {
+        return new JobTrackerResponse(t.getApplied(), t.getRejections(),
                 t.getInterviews(), t.getOffers(), t.getUpdatedAt());
     }
 }

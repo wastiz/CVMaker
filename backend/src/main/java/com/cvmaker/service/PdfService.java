@@ -14,6 +14,10 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,8 +43,17 @@ public class PdfService {
                 .orElseThrow(() -> new CvNotFoundException(cvId));
 
         CvResponse cvData = cvMapper.toResponse(cv);
+
+        Map<String, List<String>> skillsByType = cvData.skills().stream()
+                .collect(Collectors.groupingBy(
+                        CvResponse.SkillResponse::type,
+                        LinkedHashMap::new,
+                        Collectors.mapping(CvResponse.SkillResponse::name, Collectors.toList())
+                ));
+
         Context ctx = new Context();
         ctx.setVariable("cv", cvData);
+        ctx.setVariable("skillsByType", skillsByType);
 
         String template = "cv-templates/" + cv.getTemplateId();
         return templateEngine.process(template, ctx);

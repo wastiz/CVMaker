@@ -63,19 +63,19 @@ public class CvService {
     @Transactional
     public CvResponse update(Long userId, Long cvId, CvUpdateRequest req) {
         CvProfile cv = findOwnedActive(userId, cvId);
-        cv.setTitle(req.title());
+        if (req.title() != null && !req.title().isBlank()) cv.setTitle(req.title());
         if (req.templateId() != null) cv.setTemplateId(req.templateId());
-        cv.setFirstName(req.firstName());
-        cv.setLastName(req.lastName());
-        cv.setEmail(req.email());
-        cv.setPhone(req.phone());
-        cv.setLocation(req.location());
-        cv.setGithub(req.github());
-        cv.setLinkedin(req.linkedin());
-        cv.setPortfolio(req.portfolio());
-        cv.setOtherLink(req.otherLink());
-        cv.setSummary(req.summary());
-        cv.setDriverLicense(req.driverLicense());
+        if (req.firstName() != null) cv.setFirstName(req.firstName());
+        if (req.lastName() != null) cv.setLastName(req.lastName());
+        if (req.email() != null) cv.setEmail(req.email());
+        if (req.phone() != null) cv.setPhone(req.phone());
+        if (req.location() != null) cv.setLocation(req.location());
+        if (req.github() != null) cv.setGithub(req.github());
+        if (req.linkedin() != null) cv.setLinkedin(req.linkedin());
+        if (req.portfolio() != null) cv.setPortfolio(req.portfolio());
+        if (req.otherLink() != null) cv.setOtherLink(req.otherLink());
+        if (req.summary() != null) cv.setSummary(req.summary());
+        if (req.driverLicense() != null) cv.setDriverLicense(req.driverLicense());
         cvRepository.save(cv);
         return cvMapper.toResponse(cv);
     }

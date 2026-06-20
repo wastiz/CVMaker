@@ -45,6 +45,13 @@ public class CvController {
         return ResponseEntity.ok(cvService.update(user.getId(), id, req));
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<CvResponse> patch(@AuthenticationPrincipal User user,
+                                             @PathVariable Long id,
+                                             @RequestBody CvUpdateRequest req) {
+        return ResponseEntity.ok(cvService.update(user.getId(), id, req));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal User user, @PathVariable Long id) {
         cvService.softDelete(user.getId(), id);

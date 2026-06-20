@@ -1,5 +1,7 @@
 package com.cvmaker.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,9 +24,9 @@ public record CvResponse(
         LocalDateTime updatedAt,
         List<SkillResponse> skills,
         List<LanguageResponse> languages,
-        List<ExperienceResponse> experiences,
+        @JsonProperty("experience") List<ExperienceResponse> experiences,
         List<ProjectResponse> projects,
-        List<EducationResponse> educations,
+        @JsonProperty("education") List<EducationResponse> educations,
         List<CertificateResponse> certificates
 ) {
     public record SkillResponse(Long id, String type, String name, int sortOrder) {}

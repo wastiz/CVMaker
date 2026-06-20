@@ -1,9 +1,7 @@
 package com.cvmaker.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-
 public record CvUpdateRequest(
-        @NotBlank String title,
+        String title,
         String templateId,
         String firstName,
         String lastName,

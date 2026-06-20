@@ -25,7 +25,8 @@ public class CvProfile {
     private User user;
 
     @Column(nullable = false)
-    private String title;
+    @Builder.Default
+    private String title = "Untitled";
 
     @Column(name = "template_id", nullable = false)
     @Builder.Default

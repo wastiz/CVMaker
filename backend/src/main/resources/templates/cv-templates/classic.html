@@ -98,9 +98,9 @@
     <div class="section" th:if="${not #lists.isEmpty(cv.skills)}">
         <h2>Skills</h2>
         <table class="skills-grid">
-            <tr th:each="skillGroup : ${#lists.groupBy(cv.skills, 'type')}">
-                <td style="font-weight:bold; width:25mm;" th:text="${skillGroup.key}"></td>
-                <td th:text="${#strings.listJoin(skillGroup.value.![name], ', ')}"></td>
+            <tr th:each="entry : ${skillsByType}">
+                <td style="font-weight:bold; width:25mm;" th:text="${entry.key}"></td>
+                <td th:text="${#strings.listJoin(entry.value, ', ')}"></td>
             </tr>
         </table>
     </div>

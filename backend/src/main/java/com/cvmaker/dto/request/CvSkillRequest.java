@@ -7,5 +7,6 @@ import jakarta.validation.constraints.NotNull;
 public record CvSkillRequest(
         @NotNull SkillType type,
         @NotBlank String name,
-        int sortOrder
+        int sortOrder,
+        boolean showType
 ) {}

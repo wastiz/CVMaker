@@ -6,11 +6,18 @@ export interface CvSummaryResponse {
   updatedAt: string;
 }
 
+export type SkillTypeKey =
+  | "SOFT" | "MAIN" | "HARD" | "OTHER"
+  | "LANGUAGES" | "FRAMEWORKS" | "FRONTEND" | "BACKEND"
+  | "DATABASES" | "DEVOPS" | "CLOUD" | "TOOLS"
+  | "TESTING" | "ARCHITECTURE" | "METHODOLOGY";
+
 export interface CvSkillResponse {
   id: number;
-  type: "SOFT" | "MAIN" | "HARD" | "OTHER";
+  type: SkillTypeKey;
   name: string;
   sortOrder: number;
+  showType: boolean;
 }
 
 export interface CvLanguageResponse {
@@ -79,6 +86,8 @@ export interface CvResponse {
   otherLink?: string;
   summary?: string;
   driverLicense?: string;
+  sectionOrder?: string;
+  templateLanguage?: string;
   skills: CvSkillResponse[];
   languages: CvLanguageResponse[];
   experience: CvExperienceResponse[];
@@ -110,12 +119,15 @@ export interface CvUpdateRequest {
   otherLink?: string;
   summary?: string;
   driverLicense?: string;
+  sectionOrder?: string;
+  templateLanguage?: string;
 }
 
 export interface CvSkillRequest {
-  type: "SOFT" | "MAIN" | "HARD" | "OTHER";
+  type: SkillTypeKey;
   name: string;
   sortOrder: number;
+  showType: boolean;
 }
 
 export interface CvLanguageRequest {

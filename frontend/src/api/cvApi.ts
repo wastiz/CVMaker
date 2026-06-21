@@ -28,6 +28,7 @@ export const cvApi = {
   duplicate: (id: number) => api.post<CvResponse>(`/api/cv/${id}/duplicate`),
   remove: (id: number) => api.delete(`/api/cv/${id}`),
   getPdf: (id: number) => api.get(`/api/pdf/${id}`, { responseType: "blob" }),
+  getPreview: (id: number) => api.get<string>(`/api/pdf/${id}/preview`, { responseType: "text" }),
 
   // Skills
   createSkill: (cvId: number, data: CvSkillRequest) =>

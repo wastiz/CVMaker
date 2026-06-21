@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { CvEditor } from "@/components/cv-editor/CvEditor";
+import { LanguageSwitcher } from "@/components/cv-editor/LanguageSwitcher";
 import { cvApi } from "@/api/cvApi";
 import { useCvStore } from "@/store/cvStore";
 import { cn } from "@/lib/utils";
@@ -166,6 +167,9 @@ export default function CvEditorPage() {
             </button>
           )}
         </div>
+
+        {/* PDF language switcher */}
+        <LanguageSwitcher cvId={cv.id} currentLang={cv.templateLanguage} />
 
         {/* Template selector */}
         <DropdownMenu>

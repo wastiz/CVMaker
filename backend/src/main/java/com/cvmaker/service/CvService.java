@@ -76,6 +76,8 @@ public class CvService {
         if (req.otherLink() != null) cv.setOtherLink(req.otherLink());
         if (req.summary() != null) cv.setSummary(req.summary());
         if (req.driverLicense() != null) cv.setDriverLicense(req.driverLicense());
+        if (req.sectionOrder() != null) cv.setSectionOrder(req.sectionOrder());
+        if (req.templateLanguage() != null) cv.setTemplateLanguage(req.templateLanguage());
         cvRepository.save(cv);
         return cvMapper.toResponse(cv);
     }
@@ -107,10 +109,13 @@ public class CvService {
                 .otherLink(src.getOtherLink())
                 .summary(src.getSummary())
                 .driverLicense(src.getDriverLicense())
+                .sectionOrder(src.getSectionOrder())
+                .templateLanguage(src.getTemplateLanguage())
                 .build();
 
         src.getSkills().forEach(s -> copy.getSkills().add(
-                CvSkill.builder().cvProfile(copy).type(s.getType()).name(s.getName()).sortOrder(s.getSortOrder()).build()));
+                CvSkill.builder().cvProfile(copy).type(s.getType()).name(s.getName())
+                        .sortOrder(s.getSortOrder()).showType(s.isShowType()).build()));
         src.getLanguages().forEach(l -> copy.getLanguages().add(
                 CvLanguage.builder().cvProfile(copy).language(l.getLanguage()).level(l.getLevel()).sortOrder(l.getSortOrder()).build()));
         src.getExperiences().forEach(e -> copy.getExperiences().add(

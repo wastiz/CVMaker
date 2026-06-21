@@ -41,6 +41,7 @@ public class CvSectionService {
         CvProfile cv = owned(userId, cvId);
         CvSkill skill = CvSkill.builder()
                 .cvProfile(cv).type(req.type()).name(req.name()).sortOrder(req.sortOrder())
+                .showType(req.showType())
                 .build();
         return skillMapper.toResponse(skillRepository.save(skill));
     }
@@ -54,6 +55,7 @@ public class CvSectionService {
         skill.setType(req.type());
         skill.setName(req.name());
         skill.setSortOrder(req.sortOrder());
+        skill.setShowType(req.showType());
         return skillMapper.toResponse(skillRepository.save(skill));
     }
 

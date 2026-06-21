@@ -4,12 +4,12 @@
     <meta charset="UTF-8"/>
     <style>
         @page { size: A4; margin: 20mm 18mm; }
-        body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #222; margin: 0; }
+        body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #222; margin: 40mm; }
         h1 { font-size: 20pt; margin: 0 0 2mm; }
         h2 { font-size: 12pt; border-bottom: 1px solid #444; padding-bottom: 1mm; margin: 5mm 0 3mm; text-transform: uppercase; letter-spacing: 1px; }
         h3 { font-size: 11pt; margin: 0; }
         .contact { font-size: 9pt; color: #555; margin-bottom: 4mm; }
-        .contact a { color: #555; text-decoration: none; }
+        .contact a { color: #555; }
         .section { margin-bottom: 4mm; }
         .entry { margin-bottom: 3mm; }
         .entry-header { display: table; width: 100%; }
@@ -36,91 +36,96 @@
     </div>
 
     <div class="section" th:if="${cv.summary}">
-        <h2>Summary</h2>
+        <h2 th:text="${labels.summary}">Summary</h2>
         <p th:text="${cv.summary}"></p>
     </div>
 
-    <div class="section" th:if="${not #lists.isEmpty(cv.experiences)}">
-        <h2>Experience</h2>
-        <div class="entry" th:each="exp : ${cv.experiences}">
-            <div class="entry-header">
-                <div class="entry-left">
-                    <h3 th:text="${exp.position}"></h3>
-                    <p class="subtitle" th:text="${exp.company} + (${exp.location} ? ', ' + ${exp.location} : '')"></p>
-                </div>
-                <div class="entry-right">
-                    <span th:text="${exp.startDate} + ' – ' + (${exp.isCurrent} ? 'Present' : ${exp.endDate})"></span>
-                </div>
-            </div>
-            <p th:if="${exp.description}" th:text="${exp.description}"></p>
-            <div class="tags" th:if="${not #lists.isEmpty(exp.stack)}">
-                <span th:text="${#strings.listJoin(exp.stack, ' · ')}"></span>
-            </div>
-        </div>
-    </div>
+    <th:block th:each="section : ${sectionOrder}">
 
-    <div class="section" th:if="${not #lists.isEmpty(cv.projects)}">
-        <h2>Projects</h2>
-        <div class="entry" th:each="proj : ${cv.projects}">
-            <div class="entry-header">
-                <div class="entry-left">
-                    <h3 th:text="${proj.name}"></h3>
+        <div class="section" th:if="${section == 'experience' and not #lists.isEmpty(cv.experiences)}">
+            <h2 th:text="${labels.experience}">Experience</h2>
+            <div class="entry" th:each="exp : ${cv.experiences}">
+                <div class="entry-header">
+                    <div class="entry-left">
+                        <h3 th:text="${exp.position}"></h3>
+                        <p class="subtitle" th:text="${exp.company} + (${exp.location} ? ', ' + ${exp.location} : '')"></p>
+                    </div>
+                    <div class="entry-right">
+                        <span th:text="${exp.startDate} + ' – ' + (${exp.isCurrent} ? 'Present' : ${exp.endDate})"></span>
+                    </div>
                 </div>
-                <div class="entry-right">
-                    <a th:if="${proj.url}" th:href="${proj.url}" th:text="${proj.url}"></a>
-                </div>
-            </div>
-            <p th:if="${proj.description}" th:text="${proj.description}"></p>
-            <ul th:if="${not #lists.isEmpty(proj.bulletPoints)}">
-                <li th:each="bp : ${proj.bulletPoints}" th:text="${bp}"></li>
-            </ul>
-            <div class="tags" th:if="${not #lists.isEmpty(proj.stack)}">
-                <span th:text="${#strings.listJoin(proj.stack, ' · ')}"></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="section" th:if="${not #lists.isEmpty(cv.educations)}">
-        <h2>Education</h2>
-        <div class="entry" th:each="edu : ${cv.educations}">
-            <div class="entry-header">
-                <div class="entry-left">
-                    <h3 th:text="${edu.institution}"></h3>
-                    <p class="subtitle" th:if="${edu.degree}" th:text="${edu.degree} + (${edu.fieldOfStudy} ? ', ' + ${edu.fieldOfStudy} : '')"></p>
-                </div>
-                <div class="entry-right">
-                    <span th:text="${edu.startDate} + ' – ' + (${edu.isCurrent} ? 'Present' : ${edu.endDate})"></span>
+                <p th:if="${exp.description}" th:text="${exp.description}"></p>
+                <div class="tags" th:if="${not #lists.isEmpty(exp.stack)}">
+                    <span th:text="${#strings.listJoin(exp.stack, ' · ')}"></span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="section" th:if="${not #lists.isEmpty(cv.skills)}">
-        <h2>Skills</h2>
-        <table class="skills-grid">
-            <tr th:each="entry : ${skillsByType}">
-                <td style="font-weight:bold; width:25mm;" th:text="${entry.key}"></td>
-                <td th:text="${#strings.listJoin(entry.value, ', ')}"></td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="section" th:if="${not #lists.isEmpty(cv.languages)}">
-        <h2>Languages</h2>
-        <p th:text="${#strings.listJoin(cv.languages.![language + (level != null ? ' (' + level + ')' : '')], ' · ')}"></p>
-    </div>
-
-    <div class="section" th:if="${not #lists.isEmpty(cv.certificates)}">
-        <h2>Certificates</h2>
-        <div class="entry" th:each="cert : ${cv.certificates}">
-            <div class="entry-header">
-                <div class="entry-left">
-                    <h3 th:text="${cert.name}"></h3>
-                    <p class="subtitle" th:if="${cert.issuer}" th:text="${cert.issuer}"></p>
+        <div class="section" th:if="${section == 'projects' and not #lists.isEmpty(cv.projects)}">
+            <h2 th:text="${labels.projects}">Projects</h2>
+            <div class="entry" th:each="proj : ${cv.projects}">
+                <div class="entry-header">
+                    <div class="entry-left">
+                        <h3 th:text="${proj.name}"></h3>
+                    </div>
+                    <div class="entry-right">
+                        <a th:if="${proj.url}" th:href="${proj.url}" th:text="${proj.url}"></a>
+                    </div>
                 </div>
-                <div class="entry-right" th:if="${cert.issueDate}" th:text="${cert.issueDate}"></div>
+                <p th:if="${proj.description}" th:text="${proj.description}"></p>
+                <ul th:if="${not #lists.isEmpty(proj.bulletPoints)}">
+                    <li th:each="bp : ${proj.bulletPoints}" th:text="${bp}"></li>
+                </ul>
+                <div class="tags" th:if="${not #lists.isEmpty(proj.stack)}">
+                    <span th:text="${#strings.listJoin(proj.stack, ' · ')}"></span>
+                </div>
             </div>
         </div>
-    </div>
+
+        <div class="section" th:if="${section == 'education' and not #lists.isEmpty(cv.educations)}">
+            <h2 th:text="${labels.education}">Education</h2>
+            <div class="entry" th:each="edu : ${cv.educations}">
+                <div class="entry-header">
+                    <div class="entry-left">
+                        <h3 th:text="${edu.institution}"></h3>
+                        <p class="subtitle" th:if="${edu.degree}" th:text="${edu.degree} + (${edu.fieldOfStudy} ? ', ' + ${edu.fieldOfStudy} : '')"></p>
+                    </div>
+                    <div class="entry-right">
+                        <span th:text="${edu.startDate} + ' – ' + (${edu.isCurrent} ? 'Present' : ${edu.endDate})"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" th:if="${section == 'skills' and not #lists.isEmpty(cv.skills)}">
+            <h2 th:text="${labels.skills}">Skills</h2>
+            <table class="skills-grid" th:if="${!skillsByType.isEmpty()}">
+                <tr th:each="entry : ${skillsByType}">
+                    <td style="font-weight:bold; width:25mm;" th:text="${entry.key}"></td>
+                    <td th:text="${#strings.listJoin(entry.value, ', ')}"></td>
+                </tr>
+            </table>
+            <p th:if="${!skillsFlat.isEmpty()}" th:text="${#strings.listJoin(skillsFlat, ' · ')}"></p>
+        </div>
+
+        <div class="section" th:if="${section == 'languages' and not #lists.isEmpty(cv.languages)}">
+            <h2 th:text="${labels.languages}">Languages</h2>
+            <p th:text="${#strings.listJoin(cv.languages.![language + (level != null ? ' (' + level + ')' : '')], ' · ')}"></p>
+        </div>
+
+        <div class="section" th:if="${section == 'certificates' and not #lists.isEmpty(cv.certificates)}">
+            <h2 th:text="${labels.certificates}">Certificates</h2>
+            <div class="entry" th:each="cert : ${cv.certificates}">
+                <div class="entry-header">
+                    <div class="entry-left">
+                        <h3 th:text="${cert.name}"></h3>
+                        <p class="subtitle" th:if="${cert.issuer}" th:text="${cert.issuer}"></p>
+                    </div>
+                    <div class="entry-right" th:if="${cert.issueDate}" th:text="${cert.issueDate}"></div>
+                </div>
+            </div>
+        </div>
+
+    </th:block>
 </body>
 </html>

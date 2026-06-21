@@ -1,5 +1,8 @@
 package com.cvmaker.entity;
 
 public enum SkillType {
-    SOFT, MAIN, HARD, OTHER
+    SOFT, MAIN, HARD, OTHER,
+    LANGUAGES, FRAMEWORKS, FRONTEND, BACKEND,
+    DATABASES, DEVOPS, CLOUD, TOOLS,
+    TESTING, ARCHITECTURE, METHODOLOGY
 }

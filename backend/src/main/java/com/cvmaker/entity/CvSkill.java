@@ -30,4 +30,8 @@ public class CvSkill {
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
     private int sortOrder = 0;
+
+    @Column(name = "show_type", nullable = false)
+    @Builder.Default
+    private boolean showType = true;
 }

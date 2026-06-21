@@ -1,5 +1,7 @@
 package com.cvmaker.dto.request;
 
+import jakarta.validation.constraints.Pattern;
+
 public record CvUpdateRequest(
         String title,
         String templateId,
@@ -13,5 +15,7 @@ public record CvUpdateRequest(
         String portfolio,
         String otherLink,
         String summary,
-        String driverLicense
+        String driverLicense,
+        String sectionOrder,
+        @Pattern(regexp = "en|et|ru") String templateLanguage
 ) {}

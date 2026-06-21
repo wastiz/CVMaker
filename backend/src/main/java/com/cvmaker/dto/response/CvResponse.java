@@ -20,6 +20,8 @@ public record CvResponse(
         String otherLink,
         String summary,
         String driverLicense,
+        String sectionOrder,
+        String templateLanguage,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<SkillResponse> skills,
@@ -29,7 +31,7 @@ public record CvResponse(
         @JsonProperty("education") List<EducationResponse> educations,
         List<CertificateResponse> certificates
 ) {
-    public record SkillResponse(Long id, String type, String name, int sortOrder) {}
+    public record SkillResponse(Long id, String type, String name, int sortOrder, boolean showType) {}
     public record LanguageResponse(Long id, String language, String level, int sortOrder) {}
     public record ExperienceResponse(Long id, String company, String position, String location,
                                       String startDate, String endDate, boolean isCurrent,

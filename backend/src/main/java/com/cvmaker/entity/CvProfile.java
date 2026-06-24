@@ -25,7 +25,8 @@ public class CvProfile {
     private User user;
 
     @Column(nullable = false)
-    private String title;
+    @Builder.Default
+    private String title = "Untitled";
 
     @Column(name = "template_id", nullable = false)
     @Builder.Default
@@ -58,6 +59,13 @@ public class CvProfile {
 
     @Column(name = "driver_license")
     private String driverLicense;
+
+    @Column(name = "section_order", length = 500)
+    private String sectionOrder;
+
+    @Column(name = "template_language", nullable = false, length = 10)
+    @Builder.Default
+    private String templateLanguage = "en";
 
     @Column(name = "is_deleted", nullable = false)
     @Builder.Default

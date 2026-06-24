@@ -1,7 +1,7 @@
 package com.cvmaker.controller;
 
-import com.cvmaker.dto.request.TrackerPatchRequest;
-import com.cvmaker.dto.response.TrackerResponse;
+import com.cvmaker.dto.request.JobTrackerUpdateRequest;
+import com.cvmaker.dto.response.JobTrackerResponse;
 import com.cvmaker.entity.User;
 import com.cvmaker.service.JobTrackerService;
 import jakarta.validation.Valid;
@@ -18,13 +18,17 @@ public class JobTrackerController {
     private final JobTrackerService jobTrackerService;
 
     @GetMapping
-    public ResponseEntity<TrackerResponse> get(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(jobTrackerService.getTracker(user));
+    public ResponseEntity<JobTrackerResponse> get(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(jobTrackerService.getByUserId(user.getId()));
     }
 
     @PatchMapping
-    public ResponseEntity<TrackerResponse> patch(@AuthenticationPrincipal User user,
-                                                  @Valid @RequestBody TrackerPatchRequest req) {
-        return ResponseEntity.ok(jobTrackerService.patch(user, req));
+    public ResponseEntity<JobTrackerResponse> patch(@AuthenticationPrincipal User user,
+                                                     @Valid @RequestBody JobTrackerUpdateRequest req) {
+        JobTrackerResponse response = switch (req.action()) {
+            case INCREMENT -> jobTrackerService.increment(user.getId(), req.field());
+            case DECREMENT -> jobTrackerService.decrement(user.getId(), req.field());
+        };
+        return ResponseEntity.ok(response);
     }
 }

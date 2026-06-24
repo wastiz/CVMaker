@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import java.nio.charset.StandardCharsets;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +33,7 @@ public class PdfController {
                                                @PathVariable Long cvId) {
         String html = pdfService.renderHtmlPreview(user, cvId);
         return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_HTML)
+                .contentType(new MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
                 .body(html);
     }
 }

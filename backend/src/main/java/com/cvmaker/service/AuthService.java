@@ -52,6 +52,7 @@ public class AuthService {
         String accessToken = tokenProvider.generateAccessToken(user.getId(), user.getEmail());
         String refreshTokenValue = issueRefreshToken(user);
         setRefreshTokenCookie(response, refreshTokenValue);
+        setAccessTokenCookie(response, accessToken);
 
         return new AuthResponse(accessToken, toUserResponse(user));
     }
@@ -70,6 +71,7 @@ public class AuthService {
         String accessToken = tokenProvider.generateAccessToken(user.getId(), user.getEmail());
         String refreshTokenValue = issueRefreshToken(user);
         setRefreshTokenCookie(response, refreshTokenValue);
+        setAccessTokenCookie(response, accessToken);
 
         return new AuthResponse(accessToken, toUserResponse(user));
     }
@@ -93,6 +95,7 @@ public class AuthService {
             refreshTokenRepository.deleteByToken(refreshTokenValue);
         }
         clearRefreshTokenCookie(response);
+        clearAccessTokenCookie(response);
     }
 
     private String issueRefreshToken(User user) {
@@ -115,10 +118,27 @@ public class AuthService {
         response.addCookie(cookie);
     }
 
+    private void setAccessTokenCookie(HttpServletResponse response, String accessToken) {
+        Cookie cookie = new Cookie("access_token", accessToken);
+        cookie.setHttpOnly(false); // non-httpOnly so browser sends it with iframe requests
+        cookie.setSecure(false); // set true in prod
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (jwtConfig.getExpirationMs() / 1000));
+        response.addCookie(cookie);
+    }
+
     private void clearRefreshTokenCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("refresh_token", "");
         cookie.setHttpOnly(true);
         cookie.setPath("/api/auth");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
+    private void clearAccessTokenCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie("access_token", "");
+        cookie.setHttpOnly(false);
+        cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
     }

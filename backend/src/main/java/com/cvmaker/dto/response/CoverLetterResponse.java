@@ -6,6 +6,8 @@ public record CoverLetterResponse(
         Long id,
         String title,
         String content,
+        Integer fontSize,
+        String fontFamily,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}

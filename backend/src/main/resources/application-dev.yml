@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/cvmaker}
-    username: ${DB_USER:cvmaker}
-    password: ${DB_PASS:cvmaker}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:admin}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

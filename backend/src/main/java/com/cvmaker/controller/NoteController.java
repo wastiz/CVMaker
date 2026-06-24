@@ -1,6 +1,7 @@
 package com.cvmaker.controller;
 
-import com.cvmaker.dto.request.NoteRequest;
+import com.cvmaker.dto.request.NoteCreateRequest;
+import com.cvmaker.dto.request.NoteUpdateRequest;
 import com.cvmaker.dto.response.NoteResponse;
 import com.cvmaker.entity.User;
 import com.cvmaker.service.NoteService;
@@ -22,25 +23,25 @@ public class NoteController {
 
     @GetMapping
     public ResponseEntity<List<NoteResponse>> list(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(noteService.listNotes(user));
+        return ResponseEntity.ok(noteService.getAll(user.getId()));
     }
 
     @PostMapping
     public ResponseEntity<NoteResponse> create(@AuthenticationPrincipal User user,
-                                                @Valid @RequestBody NoteRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(noteService.createNote(user, req));
+                                                @Valid @RequestBody NoteCreateRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(noteService.create(user.getId(), req));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<NoteResponse> update(@AuthenticationPrincipal User user,
                                                 @PathVariable Long id,
-                                                @Valid @RequestBody NoteRequest req) {
-        return ResponseEntity.ok(noteService.updateNote(user, id, req));
+                                                @Valid @RequestBody NoteUpdateRequest req) {
+        return ResponseEntity.ok(noteService.update(user.getId(), id, req));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal User user, @PathVariable Long id) {
-        noteService.deleteNote(user, id);
+        noteService.delete(user.getId(), id);
         return ResponseEntity.noContent().build();
     }
 }

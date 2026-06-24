@@ -1,8 +1,9 @@
 package com.cvmaker.controller;
 
-import com.cvmaker.dto.request.CvRequest;
-import com.cvmaker.dto.response.CvListResponse;
+import com.cvmaker.dto.request.CvCreateRequest;
+import com.cvmaker.dto.request.CvUpdateRequest;
 import com.cvmaker.dto.response.CvResponse;
+import com.cvmaker.dto.response.CvSummaryResponse;
 import com.cvmaker.entity.User;
 import com.cvmaker.service.CvService;
 import jakarta.validation.Valid;
@@ -22,36 +23,43 @@ public class CvController {
     private final CvService cvService;
 
     @GetMapping
-    public ResponseEntity<List<CvListResponse>> list(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(cvService.listCvs(user));
+    public ResponseEntity<List<CvSummaryResponse>> list(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(cvService.getAll(user.getId()));
     }
 
     @PostMapping
     public ResponseEntity<CvResponse> create(@AuthenticationPrincipal User user,
-                                              @Valid @RequestBody CvRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cvService.createCv(user, req));
+                                              @Valid @RequestBody CvCreateRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(cvService.create(user.getId(), req));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CvResponse> get(@AuthenticationPrincipal User user, @PathVariable Long id) {
-        return ResponseEntity.ok(cvService.getCv(user, id));
+        return ResponseEntity.ok(cvService.getById(user.getId(), id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CvResponse> update(@AuthenticationPrincipal User user,
                                               @PathVariable Long id,
-                                              @Valid @RequestBody CvRequest req) {
-        return ResponseEntity.ok(cvService.updateCv(user, id, req));
+                                              @Valid @RequestBody CvUpdateRequest req) {
+        return ResponseEntity.ok(cvService.update(user.getId(), id, req));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<CvResponse> patch(@AuthenticationPrincipal User user,
+                                             @PathVariable Long id,
+                                             @RequestBody CvUpdateRequest req) {
+        return ResponseEntity.ok(cvService.update(user.getId(), id, req));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal User user, @PathVariable Long id) {
-        cvService.deleteCv(user, id);
+        cvService.softDelete(user.getId(), id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/duplicate")
     public ResponseEntity<CvResponse> duplicate(@AuthenticationPrincipal User user, @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cvService.duplicateCv(user, id));
+        return ResponseEntity.status(HttpStatus.CREATED).body(cvService.duplicate(user.getId(), id));
     }
 }

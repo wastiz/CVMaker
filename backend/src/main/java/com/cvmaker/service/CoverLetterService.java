@@ -1,14 +1,22 @@
 package com.cvmaker.service;
 
-import com.cvmaker.dto.request.CoverLetterRequest;
+import com.cvmaker.dto.request.CoverLetterCreateRequest;
+import com.cvmaker.dto.request.CoverLetterUpdateRequest;
 import com.cvmaker.dto.response.CoverLetterResponse;
 import com.cvmaker.entity.CoverLetter;
 import com.cvmaker.entity.User;
+import com.cvmaker.exception.CoverLetterNotFoundException;
 import com.cvmaker.repository.CoverLetterRepository;
+import com.cvmaker.repository.UserRepository;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -16,55 +24,103 @@ import java.util.List;
 public class CoverLetterService {
 
     private final CoverLetterRepository coverLetterRepository;
+    private final UserRepository userRepository;
+    private final TemplateEngine templateEngine;
 
-    public List<CoverLetterResponse> listCoverLetters(User user) {
-        return coverLetterRepository.findByUserOrderByUpdatedAtDesc(user).stream()
+    @Transactional(readOnly = true)
+    public List<CoverLetterResponse> getAll(Long userId) {
+        return coverLetterRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public CoverLetterResponse getById(Long userId, Long id) {
+        return toResponse(findOwned(userId, id));
+    }
+
     @Transactional
-    public CoverLetterResponse createCoverLetter(User user, CoverLetterRequest req) {
+    public CoverLetterResponse create(Long userId, CoverLetterCreateRequest req) {
+        User user = userRepository.getReferenceById(userId);
         CoverLetter cl = CoverLetter.builder()
                 .user(user)
                 .title(req.title())
                 .content(req.content())
+                .fontSize(req.fontSize() != null ? req.fontSize() : 14)
+                .fontFamily(req.fontFamily() != null && !req.fontFamily().isBlank() ? req.fontFamily() : "Inter")
                 .build();
         coverLetterRepository.save(cl);
         return toResponse(cl);
     }
 
-    public CoverLetterResponse getCoverLetter(User user, Long id) {
-        return toResponse(findOwned(user, id));
-    }
-
     @Transactional
-    public CoverLetterResponse updateCoverLetter(User user, Long id, CoverLetterRequest req) {
-        CoverLetter cl = findOwned(user, id);
-        cl.setTitle(req.title());
-        cl.setContent(req.content());
+    public CoverLetterResponse update(Long userId, Long id, CoverLetterUpdateRequest req) {
+        CoverLetter cl = findOwned(userId, id);
+        if (req.title() != null && !req.title().isBlank()) {
+            cl.setTitle(req.title());
+        }
+        if (req.content() != null) {
+            cl.setContent(req.content());
+        }
+        if (req.fontSize() != null) {
+            cl.setFontSize(req.fontSize());
+        }
+        if (req.fontFamily() != null && !req.fontFamily().isBlank()) {
+            cl.setFontFamily(req.fontFamily());
+        }
         coverLetterRepository.save(cl);
         return toResponse(cl);
     }
 
     @Transactional
-    public void deleteCoverLetter(User user, Long id) {
-        CoverLetter cl = findOwned(user, id);
+    public void delete(Long userId, Long id) {
+        CoverLetter cl = findOwned(userId, id);
         coverLetterRepository.delete(cl);
     }
 
-    public byte[] exportAsTxt(User user, Long id) {
-        CoverLetter cl = findOwned(user, id);
-        return cl.getContent().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    @Transactional(readOnly = true)
+    public byte[] exportPdf(Long userId, Long id) {
+        CoverLetter cl = findOwned(userId, id);
+        Context ctx = new Context();
+        ctx.setVariable("content", cl.getContent());
+        ctx.setVariable("fontSize", cl.getFontSize());
+        ctx.setVariable("fontFamily", cl.getFontFamily());
+        String html = templateEngine.process("cover-letter", ctx);
+        return convertToPdf(html);
     }
 
-    private CoverLetter findOwned(User user, Long id) {
-        return coverLetterRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new IllegalArgumentException("Cover letter not found: " + id));
+    @Transactional(readOnly = true)
+    public byte[] exportTxt(Long userId, Long id) {
+        CoverLetter cl = findOwned(userId, id);
+        return cl.getContent().getBytes(StandardCharsets.UTF_8);
+    }
+
+    private CoverLetter findOwned(Long userId, Long id) {
+        return coverLetterRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new CoverLetterNotFoundException(id));
     }
 
     private CoverLetterResponse toResponse(CoverLetter cl) {
-        return new CoverLetterResponse(cl.getId(), cl.getTitle(), cl.getContent(),
-                cl.getCreatedAt(), cl.getUpdatedAt());
+        return new CoverLetterResponse(
+                cl.getId(),
+                cl.getTitle(),
+                cl.getContent(),
+                cl.getFontSize(),
+                cl.getFontFamily(),
+                cl.getCreatedAt(),
+                cl.getUpdatedAt()
+        );
+    }
+
+    private byte[] convertToPdf(String html) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.withHtmlContent(html, null);
+            builder.toStream(out);
+            builder.run();
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("PDF generation failed", e);
+        }
     }
 }

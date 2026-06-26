@@ -22,6 +22,8 @@ public record CvResponse(
         String driverLicense,
         String sectionOrder,
         String templateLanguage,
+        String fontFamily,
+        int fontSizePt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<SkillResponse> skills,

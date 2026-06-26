@@ -2,26 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Download, ChevronDown, Save } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import { CvEditor } from "@/components/cv-editor/CvEditor";
 import { LanguageSwitcher } from "@/components/cv-editor/LanguageSwitcher";
+import { TemplatePicker } from "@/components/cv-editor/TemplatePicker";
 import { cvApi } from "@/api/cvApi";
 import { useCvStore } from "@/store/cvStore";
 import { cn } from "@/lib/utils";
-
-const TEMPLATES = [
-  { id: "classic", name: "Classic" },
-  { id: "minimal", name: "Minimal" },
-  { id: "sidebar", name: "Sidebar" },
-] as const;
 
 export default function CvEditorPage() {
   const params = useParams();
@@ -36,7 +25,6 @@ export default function CvEditorPage() {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const [savingTitle, setSavingTitle] = useState(false);
-  const [savingTemplate, setSavingTemplate] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   useEffect(() => {
@@ -78,19 +66,6 @@ export default function CvEditorPage() {
     }
   }
 
-  async function handleTemplateChange(templateId: string) {
-    if (!cv || cv.templateId === templateId) return;
-    setSavingTemplate(true);
-    try {
-      const { data } = await cvApi.update(cv.id, { templateId });
-      setCv(data);
-    } catch {
-      toast.error("Failed to update template");
-    } finally {
-      setSavingTemplate(false);
-    }
-  }
-
   async function handleDownloadPdf() {
     if (!cv) return;
     setDownloadingPdf(true);
@@ -112,7 +87,6 @@ export default function CvEditorPage() {
   if (isLoading || !cv) {
     return (
       <div className="-m-6 flex h-screen flex-col overflow-hidden">
-        {/* Skeleton header */}
         <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-4">
           <div className="h-7 w-7 rounded-lg bg-muted animate-pulse" />
           <div className="h-5 w-48 rounded-md bg-muted animate-pulse" />
@@ -123,8 +97,6 @@ export default function CvEditorPage() {
       </div>
     );
   }
-
-  const currentTemplate = TEMPLATES.find((t) => t.id === cv.templateId) ?? TEMPLATES[0];
 
   return (
     <div className="-m-6 flex flex-col overflow-hidden" style={{ height: "100vh" }}>
@@ -171,33 +143,8 @@ export default function CvEditorPage() {
         {/* PDF language switcher */}
         <LanguageSwitcher cvId={cv.id} currentLang={cv.templateLanguage} />
 
-        {/* Template selector */}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0 gap-1.5"
-                disabled={savingTemplate}
-              />
-            }
-          >
-            {currentTemplate.name}
-            <ChevronDown className="size-3.5 text-muted-foreground" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {TEMPLATES.map((t) => (
-              <DropdownMenuItem
-                key={t.id}
-                onClick={() => handleTemplateChange(t.id)}
-                className={cn(cv.templateId === t.id && "font-medium")}
-              >
-                {t.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Template picker */}
+        <TemplatePicker cvId={cv.id} currentTemplateId={cv.templateId} />
 
         {/* Export PDF */}
         <Button

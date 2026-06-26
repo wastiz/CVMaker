@@ -16,9 +16,13 @@ import type {
   CvEducationResponse,
   CvCertificateRequest,
   CvCertificateResponse,
+  TemplateResponse,
 } from "@/types/cv.types";
 
 export const cvApi = {
+  // Templates
+  getTemplates: () => api.get<TemplateResponse[]>("/api/templates"),
+
   // CV profile
   getAll: () => api.get<CvSummaryResponse[]>("/api/cv"),
   getById: (id: number) => api.get<CvResponse>(`/api/cv/${id}`),

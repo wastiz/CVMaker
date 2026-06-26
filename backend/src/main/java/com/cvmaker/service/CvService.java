@@ -78,6 +78,8 @@ public class CvService {
         if (req.driverLicense() != null) cv.setDriverLicense(req.driverLicense());
         if (req.sectionOrder() != null) cv.setSectionOrder(req.sectionOrder());
         if (req.templateLanguage() != null) cv.setTemplateLanguage(req.templateLanguage());
+        if (req.fontFamily() != null) cv.setFontFamily(req.fontFamily());
+        if (req.fontSizePt() != null) cv.setFontSizePt(req.fontSizePt());
         cvRepository.save(cv);
         return cvMapper.toResponse(cv);
     }
@@ -111,6 +113,8 @@ public class CvService {
                 .driverLicense(src.getDriverLicense())
                 .sectionOrder(src.getSectionOrder())
                 .templateLanguage(src.getTemplateLanguage())
+                .fontFamily(src.getFontFamily())
+                .fontSizePt(src.getFontSizePt())
                 .build();
 
         src.getSkills().forEach(s -> copy.getSkills().add(

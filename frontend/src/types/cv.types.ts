@@ -2,7 +2,10 @@ export interface CvSummaryResponse {
   id: number;
   title: string;
   templateId: string;
-  createdAt: string;
+  firstName?: string;
+  lastName?: string;
+  summary?: string;
+  templateLanguage?: string;
   updatedAt: string;
 }
 
@@ -88,6 +91,8 @@ export interface CvResponse {
   driverLicense?: string;
   sectionOrder?: string;
   templateLanguage?: string;
+  fontFamily: string;
+  fontSizePt: number;
   skills: CvSkillResponse[];
   languages: CvLanguageResponse[];
   experience: CvExperienceResponse[];
@@ -121,6 +126,15 @@ export interface CvUpdateRequest {
   driverLicense?: string;
   sectionOrder?: string;
   templateLanguage?: string;
+  fontFamily?: string;
+  fontSizePt?: number;
+}
+
+export interface TemplateResponse {
+  id: string;
+  name: string;
+  previewImageUrl: string;
+  description: string;
 }
 
 export interface CvSkillRequest {

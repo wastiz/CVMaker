@@ -13,9 +13,10 @@ import com.cvmaker.repository.JobTrackerRepository;
 import com.cvmaker.repository.RefreshTokenRepository;
 import com.cvmaker.repository.UserRepository;
 import com.cvmaker.security.JwtTokenProvider;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,37 +111,45 @@ public class AuthService {
     }
 
     private void setRefreshTokenCookie(HttpServletResponse response, String value) {
-        Cookie cookie = new Cookie("refresh_token", value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false); // set true in prod
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge((int) (jwtConfig.getRefreshExpirationMs() / 1000));
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("refresh_token", value)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(jwtConfig.getRefreshExpirationMs() / 1000)
+                .sameSite("Lax")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     private void setAccessTokenCookie(HttpServletResponse response, String accessToken) {
-        Cookie cookie = new Cookie("access_token", accessToken);
-        cookie.setHttpOnly(false); // non-httpOnly so browser sends it with iframe requests
-        cookie.setSecure(false); // set true in prod
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (jwtConfig.getExpirationMs() / 1000));
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("access_token", accessToken)
+                .httpOnly(false)
+                .secure(false)
+                .path("/")
+                .maxAge(jwtConfig.getExpirationMs() / 1000)
+                .sameSite("Lax")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     private void clearRefreshTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refresh_token", "");
-        cookie.setHttpOnly(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     private void clearAccessTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("access_token", "");
-        cookie.setHttpOnly(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("access_token", "")
+                .httpOnly(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     private UserResponse toUserResponse(User user) {

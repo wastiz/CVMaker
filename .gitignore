@@ -12,3 +12,7 @@ backend/target/
 # Next.js build output
 frontend/.next/
 frontend/node_modules/
+
+#IDE
+.idea
+.vscode

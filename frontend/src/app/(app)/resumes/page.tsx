@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Copy, Download, Trash2, FileText } from "lucide-react";
+import { Plus, Pencil, Copy, Download, Trash2, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,15 +19,11 @@ import { cvApi } from "@/api/cvApi";
 import type { CvSummaryResponse } from "@/types/cv.types";
 import { cn } from "@/lib/utils";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const TEMPLATES = [
   { id: "classic", name: "Classic", description: "Traditional single-column layout" },
   { id: "minimal", name: "Minimal", description: "Clean design with generous whitespace" },
   { id: "sidebar", name: "Sidebar", description: "Two-column layout with sidebar" },
 ] as const;
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatRelativeDate(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
@@ -40,7 +36,6 @@ function templateLabel(id: string): string {
   return TEMPLATES.find((t) => t.id === id)?.name ?? id;
 }
 
-// ─── Create Modal ─────────────────────────────────────────────────────────────
 
 function CreateModal({
   open,
@@ -125,8 +120,6 @@ function CreateModal({
   );
 }
 
-// ─── Delete Confirmation ──────────────────────────────────────────────────────
-
 function DeleteDialog({
   target,
   onClose,
@@ -163,7 +156,13 @@ function DeleteDialog({
   );
 }
 
-// ─── CV Card ─────────────────────────────────────────────────────────────────
+const LANGUAGE_LABELS: Record<string, string> = {
+  en: "English",
+  ru: "Russian",
+  de: "German",
+  fr: "French",
+  es: "Spanish",
+};
 
 function CvCard({
   cv,
@@ -178,61 +177,112 @@ function CvCard({
   onDownload: () => void;
   onDelete: () => void;
 }) {
-  return (
-    <div className="group flex flex-col rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md">
-      <div className="flex-1">
-        <h3 className="font-medium text-sm truncate">{cv.title}</h3>
-        <div className="mt-1.5 flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs">
-            {templateLabel(cv.templateId)}
-          </Badge>
-        </div>
-        <p className="mt-2 text-xs text-muted-foreground">{formatRelativeDate(cv.updatedAt)}</p>
-      </div>
+  const fullName = [cv.firstName, cv.lastName].filter(Boolean).join(" ");
+  const langLabel = cv.templateLanguage
+    ? (LANGUAGE_LABELS[cv.templateLanguage] ?? cv.templateLanguage.toUpperCase())
+    : null;
 
-      <div className="mt-4 flex items-center gap-1 border-t border-border pt-3">
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          onClick={onEdit}
-          title="Edit"
-          className="text-muted-foreground hover:text-foreground"
+  return (
+    <div className="group flex flex-col" style={{ aspectRatio: "210 / 297" }}>
+      <div
+        className="relative flex-1 flex flex-col rounded-lg border border-border bg-card shadow-sm cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 overflow-hidden"
+        onClick={onEdit}
+      >
+        <div className="h-1.5 w-full bg-gradient-to-r from-primary/60 to-primary/30 shrink-0" />
+        <div className="flex flex-col flex-1 px-4 pt-4 pb-3 min-h-0">
+          <h3 className="font-semibold text-sm leading-snug truncate">{cv.title}</h3>
+          {fullName ? (
+            <p className="mt-1 text-xs text-muted-foreground truncate">{fullName}</p>
+          ) : (
+            <p className="mt-1 text-xs text-muted-foreground/40 italic">No name</p>
+          )}
+          <div className="mt-3 h-px bg-border/60 shrink-0" />
+
+          <div className="mt-3 flex-1 min-h-0">
+            {cv.summary ? (
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-[6]">
+                {cv.summary}
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-1.5 rounded-full bg-muted/50"
+                    style={{ width: i === 4 ? "55%" : "100%" }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-border/60 shrink-0 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                {templateLabel(cv.templateId)}
+              </Badge>
+              {langLabel && (
+                <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground shrink-0">
+                  <Globe className="size-2.5" />
+                  {langLabel}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-muted-foreground truncate">
+              {formatRelativeDate(cv.updatedAt)}
+            </span>
+          </div>
+        </div>
+
+        {/* Hover action overlay */}
+        <div
+          className="absolute inset-0 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-background/80 to-transparent"
+          onClick={(e) => e.stopPropagation()}
         >
-          <Pencil className="size-3.5" />
-        </Button>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          onClick={onDuplicate}
-          title="Duplicate"
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Copy className="size-3.5" />
-        </Button>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          onClick={onDownload}
-          title="Download PDF"
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Download className="size-3.5" />
-        </Button>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          onClick={onDelete}
-          title="Delete"
-          className="ml-auto text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 className="size-3.5" />
-        </Button>
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-card/95 px-2 py-1.5 shadow-md backdrop-blur-sm">
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={onEdit}
+              title="Edit"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Pencil className="size-3.5" />
+            </Button>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={onDuplicate}
+              title="Duplicate"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Copy className="size-3.5" />
+            </Button>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={onDownload}
+              title="Download PDF"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Download className="size-3.5" />
+            </Button>
+            <div className="w-px h-4 bg-border mx-0.5" />
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={onDelete}
+              title="Delete"
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ResumesPage() {
   const router = useRouter();
@@ -258,7 +308,7 @@ export default function ResumesPage() {
   async function handleDuplicate(id: number) {
     try {
       const { data } = await cvApi.duplicate(id);
-      setCvs((prev) => [...prev, { id: data.id, title: data.title, templateId: data.templateId, createdAt: data.createdAt, updatedAt: data.updatedAt }]);
+      setCvs((prev) => [...prev, data]);
       toast.success("Resume duplicated");
     } catch {
       toast.error("Failed to duplicate resume");
@@ -293,9 +343,13 @@ export default function ResumesPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-semibold">My Resumes</h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-36 rounded-xl border border-border bg-muted/30 animate-pulse" />
+        <div className="grid grid-cols-5 gap-3 sm:grid-cols-6 lg:grid-cols-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-lg border border-border bg-muted/30 animate-pulse"
+              style={{ aspectRatio: "210 / 297" }}
+            />
           ))}
         </div>
       </div>
@@ -327,11 +381,12 @@ export default function ResumesPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">My Resumes</h1>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* New Resume card — always first */}
+      <div className="grid grid-cols-5 gap-3 sm:grid-cols-6 lg:grid-cols-8">
+        {/* New Resume card — always first, same A4 proportions */}
         <button
           onClick={() => setShowCreate(true)}
-          className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-transparent p-8 text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted/30 hover:text-foreground min-h-[9rem]"
+          style={{ aspectRatio: "210 / 297" }}
+          className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-transparent text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted/30 hover:text-foreground"
         >
           <Plus className="size-7" />
           <span className="text-sm font-medium">New Resume</span>

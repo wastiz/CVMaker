@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <style>
         @page { size: A4; margin: 0; }
-        body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #333; margin: 22mm 20mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #333; margin: 20mm 18mm; }
         table.layout { width: 100%; border-collapse: collapse; }
         td.sidebar { width: 68mm; background: #2c3e50; color: #ecf0f1; vertical-align: top; padding: 12mm 8mm; }
         td.main    { vertical-align: top; padding: 12mm 10mm; }
@@ -15,6 +15,8 @@
         .sidebar a { color: #bdc3c7; word-break: break-all; }
         .sidebar ul { margin: 0; padding-left: 4mm; }
         .sidebar .skill-type { font-size: 8pt; color: #95a5a6; font-weight: bold; margin: 2mm 0 0.5mm; }
+        .sidebar .contact-item { display: block; font-size: 9pt; color: #bdc3c7; margin: 0 0 1.5mm; white-space: normal; }
+        .sidebar .contact-item svg { vertical-align: middle; margin-right: 3pt; }
         .main h2 { font-size: 10pt; text-transform: uppercase; letter-spacing: 1px; color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 1mm; margin: 0 0 3mm; }
         .main h3 { font-size: 10.5pt; margin: 0; font-weight: 700; }
         .entry { margin-bottom: 4mm; }
@@ -28,21 +30,23 @@
         .tags { margin-top: 1mm; font-size: 9pt; color: #999; }
         .section { margin-bottom: 5mm; }
     </style>
+    <link rel="stylesheet" th:href="${fontImportUrl}"/>
 </head>
-<body>
+<body th:style="|font-family: ${fontCssStack}; font-size: ${fontSizePt}pt;|">
 <table class="layout">
 <tr>
     <td class="sidebar">
         <h1 th:text="${cv.firstName} + ' ' + ${cv.lastName}">Full Name</h1>
 
-        <div th:if="${cv.email}">
+        <div th:if="${cv.email or cv.phone or cv.location or cv.github or cv.linkedin or cv.portfolio or cv.otherLink}">
             <h2>Contact</h2>
-            <p th:text="${cv.email}"></p>
-            <p th:if="${cv.phone}" th:text="${cv.phone}"></p>
-            <p th:if="${cv.location}" th:text="${cv.location}"></p>
-            <p th:if="${cv.github}"><a th:href="${cv.github}" th:text="${cv.github}"></a></p>
-            <p th:if="${cv.linkedin}"><a th:href="${cv.linkedin}" th:text="${cv.linkedin}"></a></p>
-            <p th:if="${cv.portfolio}"><a th:href="${cv.portfolio}" th:text="${cv.portfolio}"></a></p>
+            <span th:if="${cv.email}" class="contact-item"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3pt"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7-10-7"/></svg><span th:text="${cv.email}"></span></span>
+            <span th:if="${cv.phone}" class="contact-item"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3pt"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.73 12 19.79 19.79 0 011.66 3.34 2 2 0 013.68 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg><span th:text="${cv.phone}"></span></span>
+            <span th:if="${cv.location}" class="contact-item"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3pt"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span th:text="${cv.location}"></span></span>
+            <span th:if="${cv.github}" class="contact-item"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3pt"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg><a th:href="${cv.github}" th:text="${cv.github}"></a></span>
+            <span th:if="${cv.linkedin}" class="contact-item"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3pt"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg><a th:href="${cv.linkedin}" th:text="${cv.linkedin}"></a></span>
+            <span th:if="${cv.portfolio}" class="contact-item"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3pt"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg><a th:href="${cv.portfolio}" th:text="${cv.portfolio}"></a></span>
+            <span th:if="${cv.otherLink}" class="contact-item"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3pt"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg><a th:href="${cv.otherLink}" th:text="${cv.otherLink}"></a></span>
         </div>
 
         <div th:if="${not #lists.isEmpty(cv.skills)}">
@@ -69,7 +73,7 @@
 
         <div th:if="${cv.driverLicense}">
             <h2>Driver License</h2>
-            <p th:text="${cv.driverLicense}"></p>
+            <p class="contact-item"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3pt"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span th:text="${cv.driverLicense}"></span></p>
         </div>
     </td>
 

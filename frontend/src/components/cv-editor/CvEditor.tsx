@@ -16,6 +16,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
+import { AppearanceSectionCard } from "./AppearanceSectionCard";
 import { PersonalInfoSection } from "./sections/PersonalInfoSection";
 import { SummarySection } from "./sections/SummarySection";
 import { SkillsSection } from "./sections/SkillsSection";
@@ -105,6 +106,7 @@ export function CvEditor({ cv }: Props) {
     <div className="flex flex-1 overflow-hidden">
       {/* Left panel — editor forms */}
       <div className="w-2/5 overflow-y-auto border-r border-border p-4 pl-8 space-y-3">
+        <AppearanceSectionCard cv={cv} />
         <SectionCard title="Personal Info">
           <PersonalInfoSection cv={cv} />
         </SectionCard>

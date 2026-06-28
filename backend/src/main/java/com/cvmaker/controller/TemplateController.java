@@ -13,9 +13,12 @@ import java.util.List;
 public class TemplateController {
 
     private static final List<TemplateResponse> TEMPLATES = List.of(
-            new TemplateResponse("classic", "Classic", "/previews/classic.png"),
-            new TemplateResponse("minimal", "Minimal", "/previews/minimal.png"),
-            new TemplateResponse("sidebar", "Sidebar", "/previews/sidebar.png")
+            new TemplateResponse("classic", "Classic", "/templates/previews/classic.png",
+                    "Traditional layout with serif accents"),
+            new TemplateResponse("minimal", "Minimal", "/templates/previews/minimal.png",
+                    "Clean and modern with light typography"),
+            new TemplateResponse("sidebar", "Sidebar", "/templates/previews/sidebar.png",
+                    "Dark sidebar with main content area")
     );
 
     @GetMapping

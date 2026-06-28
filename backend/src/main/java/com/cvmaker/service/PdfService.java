@@ -68,15 +68,41 @@ public class PdfService {
         String lang = cvData.templateLanguage() != null ? cvData.templateLanguage() : "en";
         Map<String, String> labels = getLabels(lang);
 
+        String fontFamily = cvData.fontFamily() != null ? cvData.fontFamily() : "inter";
+        int fontSizePt = cvData.fontSizePt() > 0 ? cvData.fontSizePt() : 10;
+
         Context ctx = new Context();
         ctx.setVariable("cv", cvData);
         ctx.setVariable("skillsByType", skillsByType);
         ctx.setVariable("skillsFlat", skillsFlat);
         ctx.setVariable("sectionOrder", sectionOrder);
         ctx.setVariable("labels", labels);
+        ctx.setVariable("fontImportUrl", getFontImportUrl(fontFamily));
+        ctx.setVariable("fontCssStack", getFontCssStack(fontFamily));
+        ctx.setVariable("fontSizePt", fontSizePt);
 
         String template = "cv-templates/" + cv.getTemplateId();
         return templateEngine.process(template, ctx);
+    }
+
+    private String getFontImportUrl(String fontFamily) {
+        return switch (fontFamily) {
+            case "roboto"        -> "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap";
+            case "lato"          -> "https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap";
+            case "merriweather"  -> "https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap";
+            case "sourcecodepro" -> "https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap";
+            default              -> "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap";
+        };
+    }
+
+    private String getFontCssStack(String fontFamily) {
+        return switch (fontFamily) {
+            case "roboto"        -> "'Roboto','Helvetica Neue',Arial,sans-serif";
+            case "lato"          -> "'Lato','Helvetica Neue',Arial,sans-serif";
+            case "merriweather"  -> "'Merriweather',Georgia,'Times New Roman',serif";
+            case "sourcecodepro" -> "'Source Code Pro','Courier New',Courier,monospace";
+            default              -> "'Inter',system-ui,-apple-system,sans-serif";
+        };
     }
 
     private String humanizeSkillType(String type) {

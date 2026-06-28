@@ -17,5 +17,7 @@ public record CvUpdateRequest(
         String summary,
         String driverLicense,
         String sectionOrder,
-        @Pattern(regexp = "en|et|ru") String templateLanguage
+        @Pattern(regexp = "en|et|ru") String templateLanguage,
+        String fontFamily,
+        Integer fontSizePt
 ) {}

@@ -67,6 +67,14 @@ public class CvProfile {
     @Builder.Default
     private String templateLanguage = "en";
 
+    @Column(name = "font_family", nullable = false, length = 50)
+    @Builder.Default
+    private String fontFamily = "inter";
+
+    @Column(name = "font_size_pt", nullable = false)
+    @Builder.Default
+    private int fontSizePt = 10;
+
     @Column(name = "is_deleted", nullable = false)
     @Builder.Default
     private boolean deleted = false;

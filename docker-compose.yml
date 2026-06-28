@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: cvmaker
       POSTGRES_PASSWORD: cvmaker
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -15,37 +15,28 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-
   backend:
     build: ./backend
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:postgresql://postgres:5432/cvmaker
       DB_USER: cvmaker
       DB_PASS: cvmaker
       JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:${FRONTEND_PORT:-3000}
     depends_on:
       postgres:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8080}
     ports:
-      - "3000:3000"
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080
+      - "${FRONTEND_PORT:-3000}:3000"
     depends_on:
       - backend
 

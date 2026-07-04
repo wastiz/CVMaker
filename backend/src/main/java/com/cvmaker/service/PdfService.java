@@ -7,6 +7,7 @@ import com.cvmaker.exception.CvNotFoundException;
 import com.cvmaker.mapper.CvMapper;
 import com.cvmaker.repository.CvRepository;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import com.openhtmltopdf.svgsupport.BatikSVGDrawer; 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -160,6 +161,7 @@ public class PdfService {
     private byte[] convertToPdf(String html) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.useSVGDrawer(new BatikSVGDrawer()); 
             builder.withHtmlContent(html, null);
             builder.toStream(out);
             builder.run();

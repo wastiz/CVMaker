@@ -16,6 +16,7 @@ import com.cvmaker.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
     private final JwtConfig jwtConfig;
+
+    @Value("${app.cookie-secure:false}")
+    private boolean cookieSecure;
 
     @Transactional
     public AuthResponse register(RegisterRequest req, HttpServletResponse response) {
@@ -113,7 +117,7 @@ public class AuthService {
     private void setRefreshTokenCookie(HttpServletResponse response, String value) {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", value)
                 .httpOnly(true)
-                .secure(false)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(jwtConfig.getRefreshExpirationMs() / 1000)
                 .sameSite("Lax")
@@ -124,7 +128,7 @@ public class AuthService {
     private void setAccessTokenCookie(HttpServletResponse response, String accessToken) {
         ResponseCookie cookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(false)
-                .secure(false)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(jwtConfig.getExpirationMs() / 1000)
                 .sameSite("Lax")

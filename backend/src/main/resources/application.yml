@@ -12,6 +12,7 @@ spring:
 
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  cookie-secure: ${COOKIE_SECURE:false}
 
 jwt:
   secret: ${JWT_SECRET:Y2hhbmdlbWVpbnByb2R1Y3Rpb25wbGVhc2VjaGFuZ2VtZQ==}

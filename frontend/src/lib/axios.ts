@@ -2,7 +2,10 @@ import axios, { AxiosError } from "axios";
 import { useAuthStore } from "@/store/authStore";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  // Relative so requests stay same-origin and go through the Next.js
+  // rewrite proxy in next.config.ts — needed for the refresh_token/
+  // access_token cookies to be scoped to the frontend's own domain.
+  baseURL: "",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

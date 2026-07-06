@@ -1,5 +1,4 @@
 export interface JobTrackerStats {
-  id: number;
   applied: number;
   rejections: number;
   interviews: number;
@@ -7,12 +6,13 @@ export interface JobTrackerStats {
   updatedAt: string;
 }
 
-export type TrackerField = "applied" | "rejections" | "interviews" | "offers";
-export type TrackerDelta = 1 | -1;
+export type StatKey = "applied" | "rejections" | "interviews" | "offers";
+export type TrackerField = "APPLIED" | "REJECTIONS" | "INTERVIEWS" | "OFFERS";
+export type TrackerAction = "INCREMENT" | "DECREMENT";
 
 export interface TrackerPatchRequest {
   field: TrackerField;
-  delta: TrackerDelta;
+  action: TrackerAction;
 }
 
 export type NoteType = "JOB_LINK" | "FREE";
@@ -30,6 +30,13 @@ export interface Note {
 
 export interface NoteCreateRequest {
   type: NoteType;
+  title?: string;
+  content?: string;
+  url?: string;
+  companyName?: string;
+}
+
+export interface NoteUpdateRequest {
   title?: string;
   content?: string;
   url?: string;

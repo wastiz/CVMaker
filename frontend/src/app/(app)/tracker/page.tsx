@@ -436,7 +436,7 @@ export default function TrackerPage() {
   }
 
   return (
-    <div className="max-w-3xl space-y-8">
+    <div className="space-y-8">
       <h1 className="text-2xl font-semibold">Job Tracker</h1>
 
       {/* ── Stats ── */}

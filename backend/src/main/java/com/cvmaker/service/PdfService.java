@@ -46,11 +46,14 @@ public class PdfService {
 
         CvResponse cvData = cvMapper.toResponse(cv);
 
+        String lang = cvData.templateLanguage() != null ? cvData.templateLanguage() : "en";
+        Map<String, String> labels = getLabels(lang);
+
         // Feature 3: split skills by showType
         Map<String, List<String>> skillsByType = cvData.skills().stream()
                 .filter(CvResponse.SkillResponse::showType)
                 .collect(Collectors.groupingBy(
-                        s -> humanizeSkillType(s.type()),
+                        s -> humanizeSkillType(s.type(), lang),
                         LinkedHashMap::new,
                         Collectors.mapping(CvResponse.SkillResponse::name, Collectors.toList())
                 ));
@@ -64,10 +67,6 @@ public class PdfService {
                 ? Arrays.stream(cvData.sectionOrder().split(","))
                         .map(String::trim).filter(s -> !s.isBlank()).toList()
                 : List.of("experience", "projects", "education", "skills", "languages", "certificates");
-
-        // Feature 2: labels
-        String lang = cvData.templateLanguage() != null ? cvData.templateLanguage() : "en";
-        Map<String, String> labels = getLabels(lang);
 
         String fontFamily = cvData.fontFamily() != null ? cvData.fontFamily() : "inter";
         int fontSizePt = cvData.fontSizePt() > 0 ? cvData.fontSizePt() : 10;
@@ -106,54 +105,93 @@ public class PdfService {
         };
     }
 
-    private String humanizeSkillType(String type) {
-        return switch (type) {
-            case "SOFT" -> "Soft skills";
-            case "HARD" -> "Hard skills";
-            case "LANGUAGES" -> "Languages";
-            case "FRAMEWORKS" -> "Frameworks";
-            case "FRONTEND" -> "Frontend";
-            case "BACKEND" -> "Backend";
-            case "DATABASES" -> "Databases";
-            case "DEVOPS" -> "DevOps";
-            case "CLOUD" -> "Cloud";
-            case "TOOLS" -> "Tools";
-            case "TESTING" -> "Testing";
-            case "ARCHITECTURE" -> "Architecture";
-            case "METHODOLOGY" -> "Methodology";
-            case "MAIN" -> "Main";
-            default -> type;
+    private String humanizeSkillType(String type, String lang) {
+        return switch (lang) {
+            case "ru" -> switch (type) {
+                case "SOFT"         -> "Мягкие навыки";
+                case "HARD"         -> "Технические навыки";
+                case "LANGUAGES"    -> "Языки программирования";
+                case "FRAMEWORKS"   -> "Фреймворки";
+                case "FRONTEND"     -> "Frontend";
+                case "BACKEND"      -> "Backend";
+                case "DATABASES"    -> "Базы данных";
+                case "DEVOPS"       -> "DevOps";
+                case "CLOUD"        -> "Облако";
+                case "TOOLS"        -> "Инструменты";
+                case "TESTING"      -> "Тестирование";
+                case "ARCHITECTURE" -> "Архитектура";
+                case "METHODOLOGY"  -> "Методология";
+                case "MAIN"         -> "Основные";
+                default             -> type;
+            };
+            case "et" -> switch (type) {
+                case "SOFT"         -> "Pehmed oskused";
+                case "HARD"         -> "Tehnilised oskused";
+                case "LANGUAGES"    -> "Programmeerimiskeeled";
+                case "FRAMEWORKS"   -> "Raamistikud";
+                case "FRONTEND"     -> "Frontend";
+                case "BACKEND"      -> "Backend";
+                case "DATABASES"    -> "Andmebaasid";
+                case "DEVOPS"       -> "DevOps";
+                case "CLOUD"        -> "Pilv";
+                case "TOOLS"        -> "Tööriistad";
+                case "TESTING"      -> "Testimine";
+                case "ARCHITECTURE" -> "Arhitektuur";
+                case "METHODOLOGY"  -> "Metoodika";
+                case "MAIN"         -> "Peamised";
+                default             -> type;
+            };
+            default -> switch (type) {
+                case "SOFT"         -> "Soft skills";
+                case "HARD"         -> "Hard skills";
+                case "LANGUAGES"    -> "Languages";
+                case "FRAMEWORKS"   -> "Frameworks";
+                case "FRONTEND"     -> "Frontend";
+                case "BACKEND"      -> "Backend";
+                case "DATABASES"    -> "Databases";
+                case "DEVOPS"       -> "DevOps";
+                case "CLOUD"        -> "Cloud";
+                case "TOOLS"        -> "Tools";
+                case "TESTING"      -> "Testing";
+                case "ARCHITECTURE" -> "Architecture";
+                case "METHODOLOGY"  -> "Methodology";
+                case "MAIN"         -> "Main";
+                default             -> type;
+            };
         };
     }
 
     private Map<String, String> getLabels(String lang) {
         return switch (lang) {
             case "et" -> Map.of(
-                "summary", "Kokkuvõte",
-                "experience", "Töökogemus",
-                "projects", "Projektid",
-                "education", "Haridus",
-                "skills", "Oskused",
-                "languages", "Keeled",
-                "certificates", "Sertifikaadid"
+                "summary",       "Kokkuvõte",
+                "experience",    "Töökogemus",
+                "projects",      "Projektid",
+                "education",     "Haridus",
+                "skills",        "Oskused",
+                "languages",     "Keeled",
+                "certificates",  "Sertifikaadid",
+                "driverLicense", "Juhiluba"
             );
             case "ru" -> Map.of(
-                "summary", "О себе",
-                "experience", "Опыт работы",
-                "projects", "Проекты",
-                "education", "Образование",
-                "skills", "Навыки",
-                "languages", "Языки",
-                "certificates", "Сертификаты"
+                "summary",       "О себе",
+                "experience",    "Опыт работы",
+                "projects",      "Проекты",
+                "education",     "Образование",
+                "skills",        "Навыки",
+                "languages",     "Языки",
+                "certificates",  "Сертификаты",
+                "driverLicense", "Водительские права"
             );
             default -> Map.of(
-                "summary", "Summary",
-                "experience", "Experience",
-                "projects", "Projects",
-                "education", "Education",
-                "skills", "Skills",
-                "languages", "Languages",
-                "certificates", "Certificates"
+                "summary",       "Summary",
+                "experience",    "Experience",
+                "projects",      "Projects",
+                "education",     "Education",
+                "skills",        "Skills",
+                "languages",     "Languages",
+                "certificates",  "Certificates",
+                "driverLicense", "Driver License"
             );
         };
     }

@@ -48,7 +48,7 @@
             <span th:if="${cv.otherLink}" class="contact-item"><a th:href="${cv.otherLink}" th:text="${cv.otherLink}"></a></span>
         </div>
 
-        <div th:if="${not #lists.isEmpty(cv.skills)}">
+        <div th:if="${not #lists.isEmpty(cv.skills) or cv.driverLicense != null}">
             <h2 th:text="${labels.skills}">Skills</h2>
             <div th:if="${!skillsByType.isEmpty()}">
                 <div th:each="entry : ${skillsByType}">
@@ -61,6 +61,12 @@
             <ul th:if="${!skillsFlat.isEmpty()}">
                 <li th:each="name : ${skillsFlat}" th:text="${name}"></li>
             </ul>
+            <div th:if="${cv.driverLicense != null}">
+                <p class="skill-type" th:text="${labels.driverLicense}"></p>
+                <ul>
+                    <li th:text="${cv.driverLicense}"></li>
+                </ul>
+            </div>
         </div>
 
         <div th:if="${not #lists.isEmpty(cv.languages)}">
@@ -68,11 +74,6 @@
             <ul>
                 <li th:each="lang : ${cv.languages}" th:text="${lang.language} + (${lang.level} ? ' — ' + ${lang.level} : '')"></li>
             </ul>
-        </div>
-
-        <div th:if="${cv.driverLicense}">
-            <h2>Driver License</h2>
-            <p class="contact-item"><span th:text="${cv.driverLicense}"></span></p>
         </div>
     </td>
 

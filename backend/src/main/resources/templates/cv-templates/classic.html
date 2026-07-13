@@ -36,7 +36,6 @@
         <span th:if="${cv.linkedin}"> · <span class="contact-item"><a th:href="${cv.linkedin}" th:text="${cv.linkedin}"></a></span></span>
         <span th:if="${cv.portfolio}"> · <span class="contact-item"><a th:href="${cv.portfolio}" th:text="${cv.portfolio}"></a></span></span>
         <span th:if="${cv.otherLink}"> · <span class="contact-item"><a th:href="${cv.otherLink}" th:text="${cv.otherLink}"></a></span></span>
-        <span th:if="${cv.driverLicense}"> · <span class="contact-item"><span th:text="${cv.driverLicense}"></span></span></span>
     </div>
 
     <div class="section" th:if="${cv.summary}">
@@ -101,12 +100,16 @@
             </div>
         </div>
 
-        <div class="section" th:if="${section == 'skills' and not #lists.isEmpty(cv.skills)}">
+        <div class="section" th:if="${section == 'skills' and (not #lists.isEmpty(cv.skills) or cv.driverLicense != null)}">
             <h2 th:text="${labels.skills}">Skills</h2>
-            <table class="skills-grid" th:if="${!skillsByType.isEmpty()}">
+            <table class="skills-grid" th:if="${!skillsByType.isEmpty() or cv.driverLicense != null}">
                 <tr th:each="entry : ${skillsByType}">
                     <td style="font-weight:bold; width:25mm;" th:text="${entry.key}"></td>
                     <td th:text="${#strings.listJoin(entry.value, ', ')}"></td>
+                </tr>
+                <tr th:if="${cv.driverLicense != null}">
+                    <td style="font-weight:bold; width:25mm;" th:text="${labels.driverLicense}"></td>
+                    <td th:text="${cv.driverLicense}"></td>
                 </tr>
             </table>
             <p th:if="${!skillsFlat.isEmpty()}" th:text="${#strings.listJoin(skillsFlat, ' · ')}"></p>

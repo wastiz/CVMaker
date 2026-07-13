@@ -510,7 +510,7 @@ export default function TrackerPage() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 grid grid-cols-4 gap-3">
             {notes.map((note) => (
               <NoteCard
                 key={note.id}

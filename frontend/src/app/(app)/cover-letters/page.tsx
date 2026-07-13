@@ -190,7 +190,7 @@ export default function CoverLettersPage() {
         </Button>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 grid grid-cols-4 gap-3">
         {letters.map((letter) => (
           <CoverLetterCard
             key={letter.id}

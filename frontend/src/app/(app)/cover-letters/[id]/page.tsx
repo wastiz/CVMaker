@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Download, FileText } from "lucide-react";
+import { ArrowLeft, Download, FileText, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { coverLetterApi, type CoverLetter } from "@/api/coverLetterApi";
+import { CoverLetterPreviewModal } from "@/components/cover-letter/CoverLetterPreviewModal";
 import { cn } from "@/lib/utils";
 
 type SaveState = "idle" | "saving" | "saved";
@@ -30,6 +31,7 @@ export default function CoverLetterEditorPage() {
 
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [downloadingTxt, setDownloadingTxt] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -97,6 +99,15 @@ export default function CoverLetterEditorPage() {
     setContent(value);
     latestRef.current = { ...latestRef.current, content: value };
     scheduleSave(latestRef.current.title, value);
+  }
+
+  async function handlePreview() {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+      await save(latestRef.current.title, latestRef.current.content);
+    }
+    setPreviewOpen(true);
   }
 
   async function handleDownload(type: "pdf" | "txt") {
@@ -208,6 +219,15 @@ export default function CoverLetterEditorPage() {
           <Button
             size="sm"
             variant="outline"
+            onClick={handlePreview}
+            className="gap-1.5"
+          >
+            <Eye className="size-3.5" />
+            Preview
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
             onClick={() => handleDownload("pdf")}
             disabled={downloadingPdf || downloadingTxt}
             className="gap-1.5"
@@ -241,6 +261,12 @@ export default function CoverLetterEditorPage() {
           />
         </div>
       </div>
+
+      <CoverLetterPreviewModal
+        id={id}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+      />
     </div>
   );
 }

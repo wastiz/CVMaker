@@ -31,6 +31,12 @@ export const coverLetterApi = {
   delete: (id: number) =>
     api.delete(`/api/cover-letters/${id}`),
 
+  duplicate: (id: number) =>
+    api.post<CoverLetter>(`/api/cover-letters/${id}/duplicate`),
+
+  getPreview: (id: number) =>
+    api.get<string>(`/api/cover-letters/${id}/preview`, { responseType: "text" }),
+
   getPdf: (id: number) =>
     api.get(`/api/cover-letters/${id}/pdf`, { responseType: "blob" }),
 

@@ -90,22 +90,35 @@ function StatCard({
 
 function NoteCard({
   note,
+  onPreview,
   onEdit,
   onDelete,
 }: {
   note: Note;
+  onPreview: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const actions = (
     <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-      <Button size="icon-sm" variant="ghost" onClick={onEdit} title="Edit">
+      <Button
+        size="icon-sm"
+        variant="ghost"
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit();
+        }}
+        title="Edit"
+      >
         <Pencil className="size-3.5" />
       </Button>
       <Button
         size="icon-sm"
         variant="ghost"
-        onClick={onDelete}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
         title="Delete"
         className="hover:text-destructive"
       >
@@ -116,7 +129,10 @@ function NoteCard({
 
   if (note.type === "JOB_LINK") {
     return (
-      <div className="group flex items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:bg-muted/20">
+      <div
+        className="group flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:bg-muted/20"
+        onClick={onPreview}
+      >
         <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
           <Link2 className="size-3.5 text-muted-foreground" />
         </div>
@@ -146,7 +162,10 @@ function NoteCard({
   }
 
   return (
-    <div className="group flex items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:bg-muted/20">
+    <div
+      className="group flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:bg-muted/20"
+      onClick={onPreview}
+    >
       <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
         <FileText className="size-3.5 text-muted-foreground" />
       </div>
@@ -162,6 +181,74 @@ function NoteCard({
       </div>
       {actions}
     </div>
+  );
+}
+
+// ─── Note Preview Modal ─────────────────────────────────────────────────────
+
+function NotePreviewModal({
+  note,
+  onClose,
+  onEdit,
+}: {
+  note: Note | null;
+  onClose: () => void;
+  onEdit: (note: Note) => void;
+}) {
+  return (
+    <Dialog open={!!note} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>
+            {note?.type === "JOB_LINK"
+              ? note.companyName || note.title || "Job Link"
+              : note?.title || "Note"}
+          </DialogTitle>
+        </DialogHeader>
+
+        {note?.type === "JOB_LINK" ? (
+          <div className="space-y-3">
+            {note.title && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Position</p>
+                <p className="mt-0.5 text-sm break-words">{note.title}</p>
+              </div>
+            )}
+            {note.companyName && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Company</p>
+                <p className="mt-0.5 text-sm break-words">{note.companyName}</p>
+              </div>
+            )}
+            {note.url && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Job URL</p>
+                <a
+                  href={note.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-0.5 flex items-center gap-1 break-all text-sm text-primary hover:underline"
+                >
+                  <ExternalLink className="size-3.5 shrink-0" />
+                  {note.url}
+                </a>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap break-words text-sm text-foreground">
+            {note?.content || "No content"}
+          </p>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+          <Button onClick={() => note && onEdit(note)}>Edit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -241,7 +328,7 @@ function NoteModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{isEdit ? "Edit Note" : "Add Note"}</DialogTitle>
@@ -378,6 +465,7 @@ export default function TrackerPage() {
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Note | null>(null);
+  const [previewNote, setPreviewNote] = useState<Note | null>(null);
 
   useEffect(() => {
     trackerApi
@@ -515,6 +603,7 @@ export default function TrackerPage() {
               <NoteCard
                 key={note.id}
                 note={note}
+                onPreview={() => setPreviewNote(note)}
                 onEdit={() => { setEditingNote(note); setNoteModalOpen(true); }}
                 onDelete={() => setDeleteTarget(note)}
               />
@@ -534,6 +623,16 @@ export default function TrackerPage() {
         note={deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteNote}
+      />
+
+      <NotePreviewModal
+        note={previewNote}
+        onClose={() => setPreviewNote(null)}
+        onEdit={(note) => {
+          setPreviewNote(null);
+          setEditingNote(note);
+          setNoteModalOpen(true);
+        }}
       />
     </div>
   );

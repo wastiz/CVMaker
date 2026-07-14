@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, FileText, Trash2 } from "lucide-react";
+import { Plus, FileText, Trash2, Copy, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { coverLetterApi, type CoverLetter } from "@/api/coverLetterApi";
+import { CoverLetterPreviewModal } from "@/components/cover-letter/CoverLetterPreviewModal";
 
 function formatRelativeDate(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
@@ -24,10 +25,14 @@ function formatRelativeDate(dateStr: string): string {
 function CoverLetterCard({
   letter,
   onOpen,
+  onPreview,
+  onDuplicate,
   onDelete,
 }: {
   letter: CoverLetter;
   onOpen: () => void;
+  onPreview: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
 }) {
   return (
@@ -44,18 +49,44 @@ function CoverLetterCard({
           {formatRelativeDate(letter.updatedAt)}
         </p>
       </div>
-      <Button
-        size="icon-sm"
-        variant="ghost"
-        title="Delete"
-        className="shrink-0 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-      >
-        <Trash2 className="size-3.5" />
-      </Button>
+      <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          title="Preview"
+          className="text-muted-foreground"
+          onClick={(e) => {
+            e.stopPropagation();
+            onPreview();
+          }}
+        >
+          <Eye className="size-3.5" />
+        </Button>
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          title="Duplicate"
+          className="text-muted-foreground"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate();
+          }}
+        >
+          <Copy className="size-3.5" />
+        </Button>
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          title="Delete"
+          className="text-muted-foreground hover:text-destructive"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <Trash2 className="size-3.5" />
+        </Button>
+      </div>
     </div>
   );
 }
@@ -104,6 +135,7 @@ export default function CoverLettersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; title: string } | null>(null);
+  const [previewId, setPreviewId] = useState<number | null>(null);
 
   useEffect(() => {
     coverLetterApi
@@ -125,6 +157,16 @@ export default function CoverLettersPage() {
     } catch {
       toast.error("Failed to create cover letter");
       setIsCreating(false);
+    }
+  }
+
+  async function handleDuplicate(id: number) {
+    try {
+      const { data } = await coverLetterApi.duplicate(id);
+      setLetters((prev) => [...prev, data]);
+      toast.success("Cover letter duplicated");
+    } catch {
+      toast.error("Failed to duplicate cover letter");
     }
   }
 
@@ -196,6 +238,8 @@ export default function CoverLettersPage() {
             key={letter.id}
             letter={letter}
             onOpen={() => router.push(`/cover-letters/${letter.id}`)}
+            onPreview={() => setPreviewId(letter.id)}
+            onDuplicate={() => handleDuplicate(letter.id)}
             onDelete={() => setDeleteTarget({ id: letter.id, title: letter.title })}
           />
         ))}
@@ -205,6 +249,12 @@ export default function CoverLettersPage() {
         target={deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
+      />
+
+      <CoverLetterPreviewModal
+        id={previewId}
+        open={previewId !== null}
+        onClose={() => setPreviewId(null)}
       />
     </div>
   );

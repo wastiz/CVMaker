@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -51,6 +52,19 @@ public class CoverLetterController {
     public ResponseEntity<Void> delete(@AuthenticationPrincipal User user, @PathVariable Long id) {
         coverLetterService.delete(user.getId(), id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/duplicate")
+    public ResponseEntity<CoverLetterResponse> duplicate(@AuthenticationPrincipal User user, @PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(coverLetterService.duplicate(user.getId(), id));
+    }
+
+    @GetMapping("/{id}/preview")
+    public ResponseEntity<String> preview(@AuthenticationPrincipal User user, @PathVariable Long id) {
+        String html = coverLetterService.renderPreviewHtml(user.getId(), id);
+        return ResponseEntity.ok()
+                .contentType(new MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
+                .body(html);
     }
 
     @GetMapping("/{id}/pdf")

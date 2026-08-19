@@ -2,14 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, ChevronDown, Download, FileJson, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { CvEditor } from "@/components/cv-editor/CvEditor";
 import { LanguageSwitcher } from "@/components/cv-editor/LanguageSwitcher";
 import { TemplatePicker } from "@/components/cv-editor/TemplatePicker";
 import { cvApi } from "@/api/cvApi";
 import { useCvStore } from "@/store/cvStore";
+import { downloadCvJson } from "@/lib/cvExportImport";
 import { cn } from "@/lib/utils";
 
 export default function CvEditorPage() {
@@ -84,6 +91,11 @@ export default function CvEditorPage() {
     }
   }
 
+  function handleExportJson() {
+    if (!cv) return;
+    downloadCvJson(cv);
+  }
+
   if (isLoading || !cv) {
     return (
       <div className="-m-6 flex h-screen flex-col overflow-hidden">
@@ -146,17 +158,26 @@ export default function CvEditorPage() {
         {/* Template picker */}
         <TemplatePicker cvId={cv.id} currentTemplateId={cv.templateId} />
 
-        {/* Export PDF */}
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={handleDownloadPdf}
-          disabled={downloadingPdf}
-          className="shrink-0 gap-1.5"
-        >
-          <Download className="size-3.5" />
-          {downloadingPdf ? "Exporting…" : "Export PDF"}
-        </Button>
+        {/* Export */}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={<Button size="sm" variant="outline" disabled={downloadingPdf} className="shrink-0 gap-1.5" />}
+          >
+            <Download className="size-3.5" />
+            {downloadingPdf ? "Exporting…" : "Export"}
+            <ChevronDown className="size-3.5" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleDownloadPdf}>
+              <FileText className="size-3.5" />
+              Export PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportJson}>
+              <FileJson className="size-3.5" />
+              Export JSON
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
       {/* ── Editor body ── */}

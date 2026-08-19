@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import type { Note, NoteCreateRequest } from "@/types/tracker.types";
+import type { Note, NoteCreateRequest, NoteUpdateRequest } from "@/types/tracker.types";
 
 export const notesApi = {
   list: () =>
@@ -8,7 +8,7 @@ export const notesApi = {
   create: (data: NoteCreateRequest) =>
     api.post<Note>("/api/notes", data),
 
-  update: (id: number, data: Partial<NoteCreateRequest>) =>
+  update: (id: number, data: NoteUpdateRequest) =>
     api.put<Note>(`/api/notes/${id}`, data),
 
   delete: (id: number) =>

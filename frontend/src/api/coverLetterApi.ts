@@ -4,6 +4,8 @@ export interface CoverLetter {
   id: number;
   title: string;
   content: string;
+  fontSize?: number;
+  fontFamily?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,11 +25,17 @@ export const coverLetterApi = {
   create: (data: CoverLetterRequest) =>
     api.post<CoverLetter>("/api/cover-letters", data),
 
-  update: (id: number, data: CoverLetterRequest) =>
+  update: (id: number, data: Partial<CoverLetterRequest>) =>
     api.put<CoverLetter>(`/api/cover-letters/${id}`, data),
 
   delete: (id: number) =>
     api.delete(`/api/cover-letters/${id}`),
+
+  duplicate: (id: number) =>
+    api.post<CoverLetter>(`/api/cover-letters/${id}/duplicate`),
+
+  getPreview: (id: number) =>
+    api.get<string>(`/api/cover-letters/${id}/preview`, { responseType: "text" }),
 
   getPdf: (id: number) =>
     api.get(`/api/cover-letters/${id}/pdf`, { responseType: "blob" }),

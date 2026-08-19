@@ -381,7 +381,7 @@ export default function ResumesPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">My Resumes</h1>
 
-      <div className="grid grid-cols-5 gap-3 sm:grid-cols-6 lg:grid-cols-8">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {/* New Resume card — always first, same A4 proportions */}
         <button
           onClick={() => setShowCreate(true)}

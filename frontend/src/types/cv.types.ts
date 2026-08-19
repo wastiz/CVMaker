@@ -107,7 +107,18 @@ export interface CvResponse {
 
 export interface CvCreateRequest {
   title: string;
-  templateId: string;
+  templateId?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  github?: string;
+  linkedin?: string;
+  portfolio?: string;
+  otherLink?: string;
+  summary?: string;
+  driverLicense?: string;
 }
 
 export interface CvUpdateRequest {

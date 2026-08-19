@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Copy, Download, Trash2, Globe } from "lucide-react";
+import { Plus, Pencil, Copy, Download, FileJson, FileText, Trash2, Globe, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { cvApi } from "@/api/cvApi";
 import type { CvSummaryResponse } from "@/types/cv.types";
+import { downloadCvJson, importCvFromFile, CvImportError } from "@/lib/cvExportImport";
 import { cn } from "@/lib/utils";
 
 const TEMPLATES = [
@@ -168,13 +175,15 @@ function CvCard({
   cv,
   onEdit,
   onDuplicate,
-  onDownload,
+  onDownloadPdf,
+  onExportJson,
   onDelete,
 }: {
   cv: CvSummaryResponse;
   onEdit: () => void;
   onDuplicate: () => void;
-  onDownload: () => void;
+  onDownloadPdf: () => void;
+  onExportJson: () => void;
   onDelete: () => void;
 }) {
   const fullName = [cv.firstName, cv.lastName].filter(Boolean).join(" ");
@@ -258,15 +267,30 @@ function CvCard({
             >
               <Copy className="size-3.5" />
             </Button>
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              onClick={onDownload}
-              title="Download PDF"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Download className="size-3.5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    title="Download"
+                    className="text-muted-foreground hover:text-foreground"
+                  />
+                }
+              >
+                <Download className="size-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center">
+                <DropdownMenuItem onClick={onDownloadPdf}>
+                  <FileText className="size-3.5" />
+                  Download PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onExportJson}>
+                  <FileJson className="size-3.5" />
+                  Export JSON
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="w-px h-4 bg-border mx-0.5" />
             <Button
               size="icon-sm"
@@ -289,7 +313,9 @@ export default function ResumesPage() {
   const [cvs, setCvs] = useState<CvSummaryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; title: string } | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     cvApi
@@ -315,7 +341,7 @@ export default function ResumesPage() {
     }
   }
 
-  async function handleDownload(id: number, title: string) {
+  async function handleDownloadPdf(id: number, title: string) {
     try {
       const { data } = await cvApi.getPdf(id);
       const url = URL.createObjectURL(new Blob([data], { type: "application/pdf" }));
@@ -329,6 +355,36 @@ export default function ResumesPage() {
     }
   }
 
+  async function handleExportJson(id: number) {
+    try {
+      const { data } = await cvApi.getById(id);
+      downloadCvJson(data);
+    } catch {
+      toast.error("Failed to export JSON");
+    }
+  }
+
+  function handleImportClick() {
+    importInputRef.current?.click();
+  }
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const imported = await importCvFromFile(file);
+      toast.success("Resume imported");
+      router.push(`/resumes/${imported.id}`);
+    } catch (err) {
+      toast.error(err instanceof CvImportError ? err.message : "Failed to import resume");
+    } finally {
+      setIsImporting(false);
+    }
+  }
+
   async function handleDelete(id: number) {
     setCvs((prev) => prev.filter((c) => c.id !== id));
     setDeleteTarget(null);
@@ -338,6 +394,16 @@ export default function ResumesPage() {
       toast.error("Failed to delete resume");
     }
   }
+
+  const importInput = (
+    <input
+      ref={importInputRef}
+      type="file"
+      accept="application/json,.json"
+      className="hidden"
+      onChange={handleImportFile}
+    />
+  );
 
   if (isLoading) {
     return (
@@ -366,12 +432,19 @@ export default function ResumesPage() {
           </div>
           <h2 className="mt-4 text-lg font-medium">No resumes yet</h2>
           <p className="mt-1 text-sm text-muted-foreground">Create your first resume to get started</p>
-          <Button className="mt-6" onClick={() => setShowCreate(true)}>
-            <Plus className="size-4 mr-1.5" />
-            Create Resume
-          </Button>
+          <div className="mt-6 flex items-center gap-2">
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="size-4 mr-1.5" />
+              Create Resume
+            </Button>
+            <Button variant="outline" onClick={handleImportClick} disabled={isImporting}>
+              <Upload className="size-4 mr-1.5" />
+              {isImporting ? "Importing…" : "Import JSON"}
+            </Button>
+          </div>
         </div>
 
+        {importInput}
         <CreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreate={handleCreate} />
       </div>
     );
@@ -379,7 +452,13 @@ export default function ResumesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">My Resumes</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">My Resumes</h1>
+        <Button variant="outline" size="sm" onClick={handleImportClick} disabled={isImporting}>
+          <Upload className="size-3.5 mr-1.5" />
+          {isImporting ? "Importing…" : "Import JSON"}
+        </Button>
+      </div>
 
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {/* New Resume card — always first, same A4 proportions */}
@@ -398,12 +477,14 @@ export default function ResumesPage() {
             cv={cv}
             onEdit={() => router.push(`/resumes/${cv.id}`)}
             onDuplicate={() => handleDuplicate(cv.id)}
-            onDownload={() => handleDownload(cv.id, cv.title)}
+            onDownloadPdf={() => handleDownloadPdf(cv.id, cv.title)}
+            onExportJson={() => handleExportJson(cv.id)}
             onDelete={() => setDeleteTarget({ id: cv.id, title: cv.title })}
           />
         ))}
       </div>
 
+      {importInput}
       <CreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreate={handleCreate} />
       <DeleteDialog
         target={deleteTarget}

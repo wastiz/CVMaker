@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8"/>
     <style>
-        @page { size: A4; margin: 0 }
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10.5pt; color: #333; margin: 20mm 18mm; line-height: 1.5; }
+        @page { size: A4; margin: 20mm 18mm; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10.5pt; color: #333; margin: 0; line-height: 1.5; }
+        /* @page margin only applies when paginating (openhtmltopdf); mirror it
+           for the on-screen live preview, which never sees @page rules. */
+        @media screen { body { margin: 20mm 18mm; } }
         h1 { font-size: 22pt; font-weight: 300; letter-spacing: 2px; margin: 0 0 1mm; color: #111; }
-        h2 { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #888; margin: 7mm 0 3mm; border: none; }
+        h2 { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #888; margin: 7mm 0 3mm; border: none; page-break-after: avoid; break-after: avoid; }
         h3 { font-size: 11pt; font-weight: 600; margin: 0; color: #111; }
         .contact { font-size: 9pt; color: #888; margin-bottom: 7mm; line-height: 1.8; }
         .contact a { color: #888; }
         .contact-item { white-space: nowrap; }
-        .entry { margin-bottom: 4mm; }
+        .entry { margin-bottom: 4mm; page-break-inside: avoid; break-inside: avoid; }
         .meta { font-size: 9pt; color: #aaa; margin: 0; }
         p { margin: 1mm 0 0; }
         ul { margin: 1mm 0 0 4mm; padding: 0; }

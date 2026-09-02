@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8"/>
     <style>
-        @page { size: A4; margin: 0 }
-        body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #222; margin: 10mm 15mm; }
+        @page { size: A4; margin: 10mm 15mm; }
+        body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #222; margin: 0; }
+        /* @page margin only applies when paginating (openhtmltopdf); mirror it
+           for the on-screen live preview, which never sees @page rules. */
+        @media screen { body { margin: 10mm 15mm; } }
         h1 { font-size: 20pt; margin: 0 0 2mm; }
-        h2 { font-size: 12pt; border-bottom: 1px solid #444; padding-bottom: 1mm; margin: 5mm 0 3mm; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { font-size: 12pt; border-bottom: 1px solid #444; padding-bottom: 1mm; margin: 5mm 0 3mm; text-transform: uppercase; letter-spacing: 1px; page-break-after: avoid; break-after: avoid; }
         h3 { font-size: 11pt; margin: 0; }
         .contact { font-size: 9pt; color: #555; margin-bottom: 4mm; line-height: 1.8; }
         .contact a { color: #555; }
         .contact-item { white-space: nowrap; }
         .section { margin-bottom: 4mm; }
-        .entry { margin-bottom: 3mm; }
+        .entry { margin-bottom: 3mm; page-break-inside: avoid; break-inside: avoid; }
         .entry-header { display: table; width: 100%; }
         .entry-left  { display: table-cell; }
         .entry-right { display: table-cell; text-align: right; font-size: 9pt; color: #666; white-space: nowrap; }

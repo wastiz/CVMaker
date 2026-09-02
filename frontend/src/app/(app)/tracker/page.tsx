@@ -197,7 +197,7 @@ function NotePreviewModal({
 }) {
   return (
     <Dialog open={!!note} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             {note?.type === "JOB_LINK"
@@ -328,7 +328,7 @@ function NoteModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-3xl">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{isEdit ? "Edit Note" : "Add Note"}</DialogTitle>

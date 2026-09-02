@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type SyntheticEvent } from "react";
 import {
   DndContext,
   closestCenter,
@@ -57,6 +57,8 @@ export function CvEditor({ cv }: Props) {
   const [scale, setScale] = useState(1);
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [pageCount, setPageCount] = useState(1);
+  const [contentHeight, setContentHeight] = useState(A4_HEIGHT);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sensors = useSensors(
@@ -68,10 +70,8 @@ export function CvEditor({ cv }: Props) {
     const el = containerRef.current;
     if (!el) return;
     const observer = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      const scaleX = (width - 32) / A4_WIDTH;
-      const scaleY = (height - 32) / A4_HEIGHT;
-      setScale(Math.min(scaleX, scaleY, 1));
+      const { width } = entries[0].contentRect;
+      setScale(Math.min((width - 32) / A4_WIDTH, 1));
     });
     observer.observe(el);
     return () => observer.disconnect();
@@ -82,10 +82,23 @@ export function CvEditor({ cv }: Props) {
     setPreviewLoading(true);
     cvApi
       .getPreview(cv.id)
-      .then(({ data }) => setPreviewHtml(data))
+      .then(({ data }) => {
+        setPreviewHtml(data);
+        // Reset to one page until the first sheet reports the real content
+        // height — avoids briefly showing a stale page count.
+        setPageCount(1);
+      })
       .catch(() => {})
       .finally(() => setPreviewLoading(false));
   }, [previewTimestamp, cv.id]);
+
+  function handleFirstPageLoad(e: SyntheticEvent<HTMLIFrameElement>) {
+    const doc = e.currentTarget.contentDocument;
+    if (!doc) return;
+    const height = doc.documentElement.scrollHeight;
+    setContentHeight(height);
+    setPageCount(Math.max(1, Math.ceil(height / A4_HEIGHT)));
+  }
 
   function handleSectionDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -131,31 +144,50 @@ export function CvEditor({ cv }: Props) {
         <div className="h-8" />
       </div>
 
-      {/* Right panel — live A4 preview */}
+      {/* Right panel — live A4 preview, paginated to match the real PDF output */}
       <div
         ref={containerRef}
-        className="flex-1 bg-muted/20 overflow-hidden flex items-start justify-center p-4"
+        className="relative flex-1 bg-muted/20 overflow-y-auto overflow-x-hidden p-4"
       >
+        <div className="absolute right-4 top-4 z-20 rounded-full bg-foreground/80 px-2.5 py-1 text-xs font-medium text-background shadow">
+          {pageCount} {pageCount === 1 ? "page" : "pages"}
+        </div>
+
         <div
-          className="relative bg-white shadow-xl ring-1 ring-black/5 flex-shrink-0"
+          className="mx-auto flex flex-col items-center gap-6"
           style={{
-            width: A4_WIDTH,
-            height: A4_HEIGHT,
-            transform: `scale(${scale})`,
-            transformOrigin: "top center",
+            width: A4_WIDTH * scale,
           }}
         >
-          {previewLoading && (
-            <div className="absolute inset-0 bg-white z-10 flex items-center justify-center">
-              <Skeleton className="w-full h-full" />
+          {Array.from({ length: pageCount }).map((_, index) => (
+            <div
+              key={index}
+              className="relative flex-shrink-0 overflow-hidden bg-white shadow-xl ring-1 ring-black/5"
+              style={{
+                width: A4_WIDTH * scale,
+                height: A4_HEIGHT * scale,
+              }}
+            >
+              {previewLoading && index === 0 && (
+                <div className="absolute inset-0 bg-white z-10 flex items-center justify-center">
+                  <Skeleton className="w-full h-full" />
+                </div>
+              )}
+              <iframe
+                srcDoc={previewHtml}
+                className="absolute left-0 border-none origin-top-left"
+                style={{
+                  top: 0,
+                  width: A4_WIDTH,
+                  height: contentHeight,
+                  transform: `scale(${scale}) translateY(-${index * A4_HEIGHT}px)`,
+                }}
+                title={`CV Preview — page ${index + 1}`}
+                sandbox="allow-same-origin"
+                onLoad={index === 0 ? handleFirstPageLoad : undefined}
+              />
             </div>
-          )}
-          <iframe
-            srcDoc={previewHtml}
-            className="w-full h-full border-none"
-            title="CV Preview"
-            sandbox="allow-same-origin"
-          />
+          ))}
         </div>
       </div>
     </div>

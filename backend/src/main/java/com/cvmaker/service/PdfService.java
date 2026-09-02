@@ -15,6 +15,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -63,10 +64,7 @@ public class PdfService {
                 .toList();
 
         // Feature 1: section order
-        List<String> sectionOrder = (cvData.sectionOrder() != null && !cvData.sectionOrder().isBlank())
-                ? Arrays.stream(cvData.sectionOrder().split(","))
-                        .map(String::trim).filter(s -> !s.isBlank()).toList()
-                : List.of("experience", "projects", "education", "skills", "languages", "certificates");
+        List<String> sectionOrder = resolveSectionOrder(cvData.sectionOrder());
 
         String fontFamily = cvData.fontFamily() != null ? cvData.fontFamily() : "inter";
         int fontSizePt = cvData.fontSizePt() > 0 ? cvData.fontSizePt() : 10;
@@ -83,6 +81,24 @@ public class PdfService {
 
         String template = "cv-templates/" + cv.getTemplateId();
         return templateEngine.process(template, ctx);
+    }
+
+    private static final List<String> DEFAULT_SECTION_ORDER =
+            List.of("experience", "projects", "education", "skills", "strengths", "languages", "certificates");
+
+    /**
+     * Stored orders predate later sections, so anything missing from the saved
+     * value is appended in its default position instead of silently vanishing
+     * from the rendered CV.
+     */
+    private List<String> resolveSectionOrder(String stored) {
+        if (stored == null || stored.isBlank()) return DEFAULT_SECTION_ORDER;
+        List<String> saved = Arrays.stream(stored.split(","))
+                .map(String::trim).filter(s -> !s.isBlank()).toList();
+        if (saved.isEmpty()) return DEFAULT_SECTION_ORDER;
+        List<String> merged = new ArrayList<>(saved);
+        DEFAULT_SECTION_ORDER.stream().filter(s -> !merged.contains(s)).forEach(merged::add);
+        return merged;
     }
 
     private String getFontImportUrl(String fontFamily) {
@@ -169,6 +185,7 @@ public class PdfService {
                 "projects",      "Projektid",
                 "education",     "Haridus",
                 "skills",        "Oskused",
+                "strengths",     "Tugevused",
                 "languages",     "Keeled",
                 "certificates",  "Sertifikaadid",
                 "driverLicense", "Juhiluba"
@@ -179,6 +196,7 @@ public class PdfService {
                 "projects",      "Проекты",
                 "education",     "Образование",
                 "skills",        "Навыки",
+                "strengths",     "Сильные стороны",
                 "languages",     "Языки",
                 "certificates",  "Сертификаты",
                 "driverLicense", "Водительские права"
@@ -189,6 +207,7 @@ public class PdfService {
                 "projects",      "Projects",
                 "education",     "Education",
                 "skills",        "Skills",
+                "strengths",     "Strengths",
                 "languages",     "Languages",
                 "certificates",  "Certificates",
                 "driverLicense", "Driver License"

@@ -27,6 +27,7 @@ public record CvResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<SkillResponse> skills,
+        List<StrengthResponse> strengths,
         List<LanguageResponse> languages,
         @JsonProperty("experience") List<ExperienceResponse> experiences,
         List<ProjectResponse> projects,
@@ -34,10 +35,12 @@ public record CvResponse(
         List<CertificateResponse> certificates
 ) {
     public record SkillResponse(Long id, String type, String name, int sortOrder, boolean showType) {}
+    public record StrengthResponse(Long id, String name, int sortOrder) {}
     public record LanguageResponse(Long id, String language, String level, int sortOrder) {}
     public record ExperienceResponse(Long id, String company, String position, String location,
                                       String startDate, String endDate, boolean isCurrent,
-                                      String description, List<String> stack, int sortOrder) {}
+                                      String description, List<String> bulletPoints,
+                                      List<String> stack, int sortOrder) {}
     public record ProjectResponse(Long id, String name, String url, String description,
                                    List<String> bulletPoints, List<String> stack, int sortOrder) {}
     public record EducationResponse(Long id, String institution, String degree, String fieldOfStudy,

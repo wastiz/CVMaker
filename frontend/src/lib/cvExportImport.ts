@@ -62,6 +62,9 @@ export async function importCvFromFile(file: File): Promise<CvResponse> {
     ...(cv.skills ?? []).map((s) =>
       cvApi.createSkill(cvId, { type: s.type, name: s.name, sortOrder: s.sortOrder, showType: s.showType })
     ),
+    ...(cv.strengths ?? []).map((s) =>
+      cvApi.createStrength(cvId, { name: s.name, sortOrder: s.sortOrder })
+    ),
     ...(cv.languages ?? []).map((l) =>
       cvApi.createLanguage(cvId, { language: l.language, level: l.level, sortOrder: l.sortOrder })
     ),
@@ -74,6 +77,7 @@ export async function importCvFromFile(file: File): Promise<CvResponse> {
         endDate: e.endDate,
         isCurrent: e.isCurrent,
         description: e.description,
+        bulletPoints: e.bulletPoints,
         stack: e.stack,
         sortOrder: e.sortOrder,
       })

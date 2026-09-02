@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2, ChevronDown } from "lucide-react";
+import { Pencil, Trash2, ChevronDown, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   DndContext,
@@ -44,6 +44,7 @@ const EMPTY_FORM: ExpForm = {
   endDate: "",
   isCurrent: false,
   description: "",
+  bulletPoints: [],
   stack: [],
 };
 
@@ -62,6 +63,20 @@ function ExperienceForm({
 
   function set<K extends keyof ExpForm>(key: K, val: ExpForm[K]) {
     setForm((f) => ({ ...f, [key]: val }));
+  }
+
+  function addBullet() {
+    set("bulletPoints", [...(form.bulletPoints ?? []), ""]);
+  }
+
+  function updateBullet(idx: number, val: string) {
+    const pts = [...(form.bulletPoints ?? [])];
+    pts[idx] = val;
+    set("bulletPoints", pts);
+  }
+
+  function removeBullet(idx: number) {
+    set("bulletPoints", (form.bulletPoints ?? []).filter((_, i) => i !== idx));
   }
 
   return (
@@ -112,6 +127,32 @@ function ExperienceForm({
           placeholder="Describe your responsibilities and achievements..."
           className="min-h-20 resize-none"
         />
+      </div>
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs text-muted-foreground">Bullet Points</Label>
+          <Button type="button" size="icon-xs" variant="ghost" onClick={addBullet}>
+            <Plus className="size-3" />
+          </Button>
+        </div>
+        <div className="space-y-1.5">
+          {(form.bulletPoints ?? []).map((pt, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <Input
+                value={pt}
+                onChange={(e) => updateBullet(idx, e.target.value)}
+                placeholder={`Point ${idx + 1}`}
+                className="flex-1"
+              />
+              <Button type="button" size="icon-sm" variant="ghost" onClick={() => removeBullet(idx)}>
+                <X className="size-3.5 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          {(form.bulletPoints ?? []).length === 0 && (
+            <p className="text-xs text-muted-foreground">No bullet points. Click + to add.</p>
+          )}
+        </div>
       </div>
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Tech Stack</Label>
@@ -251,6 +292,7 @@ export function ExperienceSection({ cv }: Props) {
                             endDate: item.endDate,
                             isCurrent: item.isCurrent,
                             description: item.description,
+                            bulletPoints: item.bulletPoints ?? [],
                             stack: item.stack ?? [],
                           }}
                           onSave={(form) => handleSave(item, form)}

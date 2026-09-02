@@ -17,12 +17,14 @@ public class CvSectionService {
 
     private final CvRepository cvRepository;
     private final CvSkillRepository skillRepository;
+    private final CvStrengthRepository strengthRepository;
     private final CvLanguageRepository languageRepository;
     private final CvExperienceRepository experienceRepository;
     private final CvProjectRepository projectRepository;
     private final CvEducationRepository educationRepository;
     private final CvCertificateRepository certificateRepository;
     private final CvSkillMapper skillMapper;
+    private final CvStrengthMapper strengthMapper;
     private final CvLanguageMapper languageMapper;
     private final CvExperienceMapper experienceMapper;
     private final CvProjectMapper projectMapper;
@@ -68,6 +70,37 @@ public class CvSectionService {
         skillRepository.delete(skill);
     }
 
+    // ─── Strengths ───────────────────────────────────────────────────────────
+
+    @Transactional
+    public CvResponse.StrengthResponse createStrength(Long userId, Long cvId, CvStrengthRequest req) {
+        CvProfile cv = owned(userId, cvId);
+        CvStrength strength = CvStrength.builder()
+                .cvProfile(cv).name(req.name()).sortOrder(req.sortOrder())
+                .build();
+        return strengthMapper.toResponse(strengthRepository.save(strength));
+    }
+
+    @Transactional
+    public CvResponse.StrengthResponse updateStrength(Long userId, Long cvId, Long strengthId, CvStrengthRequest req) {
+        owned(userId, cvId);
+        CvStrength strength = strengthRepository.findById(strengthId)
+                .filter(s -> s.getCvProfile().getId().equals(cvId))
+                .orElseThrow(() -> new EntityNotFoundException("Strength " + strengthId + " not found"));
+        strength.setName(req.name());
+        strength.setSortOrder(req.sortOrder());
+        return strengthMapper.toResponse(strengthRepository.save(strength));
+    }
+
+    @Transactional
+    public void deleteStrength(Long userId, Long cvId, Long strengthId) {
+        owned(userId, cvId);
+        CvStrength strength = strengthRepository.findById(strengthId)
+                .filter(s -> s.getCvProfile().getId().equals(cvId))
+                .orElseThrow(() -> new EntityNotFoundException("Strength " + strengthId + " not found"));
+        strengthRepository.delete(strength);
+    }
+
     // ─── Languages ───────────────────────────────────────────────────────────
 
     @Transactional
@@ -108,7 +141,8 @@ public class CvSectionService {
         CvExperience exp = CvExperience.builder()
                 .cvProfile(cv).company(req.company()).position(req.position())
                 .location(req.location()).startDate(req.startDate()).endDate(req.endDate())
-                .isCurrent(req.isCurrent()).description(req.description()).stack(req.stack())
+                .isCurrent(req.isCurrent()).description(req.description())
+                .bulletPoints(req.bulletPoints()).stack(req.stack())
                 .sortOrder(req.sortOrder())
                 .build();
         return experienceMapper.toResponse(experienceRepository.save(exp));
@@ -127,6 +161,7 @@ public class CvSectionService {
         exp.setEndDate(req.endDate());
         exp.setCurrent(req.isCurrent());
         exp.setDescription(req.description());
+        exp.setBulletPoints(req.bulletPoints());
         exp.setStack(req.stack());
         exp.setSortOrder(req.sortOrder());
         return experienceMapper.toResponse(experienceRepository.save(exp));

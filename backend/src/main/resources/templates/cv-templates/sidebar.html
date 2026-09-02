@@ -26,9 +26,9 @@
         .entry-left  { display: table-cell; }
         .entry-right { display: table-cell; text-align: right; font-size: 9pt; color: #999; white-space: nowrap; }
         .subtitle { font-size: 9pt; color: #777; margin: 0; }
-        p { margin: 1mm 0 0; }
+        p { margin: 1mm 0 0; orphans: 2; widows: 2; }
         ul.bullets { margin: 1mm 0 0 4mm; padding: 0; }
-        li { margin-bottom: 0.5mm; }
+        li { margin-bottom: 0.5mm; page-break-inside: avoid; break-inside: avoid; }
         .tags { margin-top: 1mm; font-size: 9pt; color: #999; }
         .section { margin-bottom: 5mm; }
     </style>
@@ -40,7 +40,7 @@
     <td class="sidebar">
         <h1 th:text="${cv.firstName} + ' ' + ${cv.lastName}">Full Name</h1>
 
-        <div th:if="${cv.email or cv.phone or cv.location or cv.github or cv.linkedin or cv.portfolio or cv.otherLink}">
+        <div th:if="${cv.email != null or cv.phone != null or cv.location != null or cv.github != null or cv.linkedin != null or cv.portfolio != null or cv.otherLink != null}">
             <h2>Contact</h2>
             <span th:if="${cv.email}" class="contact-item"><span th:text="${cv.email}"></span></span>
             <span th:if="${cv.phone}" class="contact-item"><span th:text="${cv.phone}"></span></span>
@@ -72,6 +72,13 @@
             </div>
         </div>
 
+        <div th:if="${not #lists.isEmpty(cv.strengths)}">
+            <h2 th:text="${labels.strengths}">Strengths</h2>
+            <ul>
+                <li th:each="strength : ${cv.strengths}" th:text="${strength.name}"></li>
+            </ul>
+        </div>
+
         <div th:if="${not #lists.isEmpty(cv.languages)}">
             <h2 th:text="${labels.languages}">Languages</h2>
             <ul>
@@ -101,6 +108,9 @@
                         </div>
                     </div>
                     <p th:if="${exp.description}" th:text="${exp.description}"></p>
+                    <ul class="bullets" th:if="${not #lists.isEmpty(exp.bulletPoints)}">
+                        <li th:each="bp : ${exp.bulletPoints}" th:text="${bp}"></li>
+                    </ul>
                     <div class="tags" th:if="${not #lists.isEmpty(exp.stack)}" th:text="${#strings.listJoin(exp.stack, ' · ')}"></div>
                 </div>
             </div>

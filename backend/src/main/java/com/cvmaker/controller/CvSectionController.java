@@ -47,6 +47,35 @@ public class CvSectionController {
         return ResponseEntity.noContent().build();
     }
 
+    // ─── Strengths ───────────────────────────────────────────────────────────
+
+    @PostMapping("/{cvId}/strengths")
+    public ResponseEntity<CvResponse.StrengthResponse> createStrength(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long cvId,
+            @Valid @RequestBody CvStrengthRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(sectionService.createStrength(user.getId(), cvId, req));
+    }
+
+    @PutMapping("/{cvId}/strengths/{id}")
+    public ResponseEntity<CvResponse.StrengthResponse> updateStrength(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long cvId,
+            @PathVariable Long id,
+            @Valid @RequestBody CvStrengthRequest req) {
+        return ResponseEntity.ok(sectionService.updateStrength(user.getId(), cvId, id, req));
+    }
+
+    @DeleteMapping("/{cvId}/strengths/{id}")
+    public ResponseEntity<Void> deleteStrength(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long cvId,
+            @PathVariable Long id) {
+        sectionService.deleteStrength(user.getId(), cvId, id);
+        return ResponseEntity.noContent().build();
+    }
+
     // ─── Languages ───────────────────────────────────────────────────────────
 
     @PostMapping("/{cvId}/languages")

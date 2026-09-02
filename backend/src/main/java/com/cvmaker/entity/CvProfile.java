@@ -93,6 +93,11 @@ public class CvProfile {
     @OneToMany(mappedBy = "cvProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     @Builder.Default
+    private List<CvStrength> strengths = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cvProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    @Builder.Default
     private List<CvLanguage> languages = new ArrayList<>();
 
     @OneToMany(mappedBy = "cvProfile", cascade = CascadeType.ALL, orphanRemoval = true)

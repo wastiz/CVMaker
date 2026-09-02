@@ -120,12 +120,16 @@ public class CvService {
         src.getSkills().forEach(s -> copy.getSkills().add(
                 CvSkill.builder().cvProfile(copy).type(s.getType()).name(s.getName())
                         .sortOrder(s.getSortOrder()).showType(s.isShowType()).build()));
+        src.getStrengths().forEach(s -> copy.getStrengths().add(
+                CvStrength.builder().cvProfile(copy).name(s.getName())
+                        .sortOrder(s.getSortOrder()).build()));
         src.getLanguages().forEach(l -> copy.getLanguages().add(
                 CvLanguage.builder().cvProfile(copy).language(l.getLanguage()).level(l.getLevel()).sortOrder(l.getSortOrder()).build()));
         src.getExperiences().forEach(e -> copy.getExperiences().add(
                 CvExperience.builder().cvProfile(copy).company(e.getCompany()).position(e.getPosition())
                         .location(e.getLocation()).startDate(e.getStartDate()).endDate(e.getEndDate())
-                        .isCurrent(e.isCurrent()).description(e.getDescription()).stack(e.getStack())
+                        .isCurrent(e.isCurrent()).description(e.getDescription())
+                        .bulletPoints(e.getBulletPoints()).stack(e.getStack())
                         .sortOrder(e.getSortOrder()).build()));
         src.getProjects().forEach(p -> copy.getProjects().add(
                 CvProject.builder().cvProfile(copy).name(p.getName()).url(p.getUrl())

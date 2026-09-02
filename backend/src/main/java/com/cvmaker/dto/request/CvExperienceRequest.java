@@ -12,6 +12,7 @@ public record CvExperienceRequest(
         String endDate,
         boolean isCurrent,
         String description,
+        List<String> bulletPoints,
         List<String> stack,
         int sortOrder
 ) {}

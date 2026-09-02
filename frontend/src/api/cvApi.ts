@@ -6,6 +6,8 @@ import type {
   CvUpdateRequest,
   CvSkillRequest,
   CvSkillResponse,
+  CvStrengthRequest,
+  CvStrengthResponse,
   CvLanguageRequest,
   CvLanguageResponse,
   CvExperienceRequest,
@@ -41,6 +43,14 @@ export const cvApi = {
     api.put<CvSkillResponse>(`/api/cv/${cvId}/skills/${id}`, data),
   deleteSkill: (cvId: number, id: number) =>
     api.delete(`/api/cv/${cvId}/skills/${id}`),
+
+  // Strengths
+  createStrength: (cvId: number, data: CvStrengthRequest) =>
+    api.post<CvStrengthResponse>(`/api/cv/${cvId}/strengths`, data),
+  updateStrength: (cvId: number, id: number, data: CvStrengthRequest) =>
+    api.put<CvStrengthResponse>(`/api/cv/${cvId}/strengths/${id}`, data),
+  deleteStrength: (cvId: number, id: number) =>
+    api.delete(`/api/cv/${cvId}/strengths/${id}`),
 
   // Languages
   createLanguage: (cvId: number, data: CvLanguageRequest) =>

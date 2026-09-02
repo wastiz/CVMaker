@@ -16,12 +16,13 @@
         .contact-item { white-space: nowrap; }
         .entry { margin-bottom: 4mm; page-break-inside: avoid; break-inside: avoid; }
         .meta { font-size: 9pt; color: #aaa; margin: 0; }
-        p { margin: 1mm 0 0; }
+        p { margin: 1mm 0 0; orphans: 2; widows: 2; }
         ul { margin: 1mm 0 0 4mm; padding: 0; }
-        li { margin-bottom: 0.5mm; }
+        li { margin-bottom: 0.5mm; page-break-inside: avoid; break-inside: avoid; }
         .tags { margin-top: 1mm; font-size: 9pt; color: #aaa; }
         .skills-grid { font-size: 10pt; }
         .skills-grid td { padding: 0 4mm 1mm 0; vertical-align: top; }
+        .skills-grid tr { page-break-inside: avoid; break-inside: avoid; }
     </style>
     <link rel="stylesheet" th:href="${fontImportUrl}"/>
 </head>
@@ -50,6 +51,9 @@
                 <h3 th:text="${exp.position} + '  —  ' + ${exp.company}"></h3>
                 <p class="meta" th:text="${exp.startDate} + ' – ' + (${exp.isCurrent} ? 'Present' : ${exp.endDate}) + (${exp.location} ? '  ·  ' + ${exp.location} : '')"></p>
                 <p th:if="${exp.description}" th:text="${exp.description}"></p>
+                <ul th:if="${not #lists.isEmpty(exp.bulletPoints)}">
+                    <li th:each="bp : ${exp.bulletPoints}" th:text="${bp}"></li>
+                </ul>
                 <div class="tags" th:if="${not #lists.isEmpty(exp.stack)}" th:text="${#strings.listJoin(exp.stack, '  ·  ')}"></div>
             </div>
         </div>
@@ -87,6 +91,11 @@
                 </tr>
             </table>
             <p th:if="${!skillsFlat.isEmpty()}" th:text="${#strings.listJoin(skillsFlat, '  ·  ')}"></p>
+        </div>
+
+        <div th:if="${section == 'strengths' and not #lists.isEmpty(cv.strengths)}">
+            <h2 th:text="${labels.strengths}">Strengths</h2>
+            <p th:text="${#strings.listJoin(cv.strengths.![name], '  ·  ')}"></p>
         </div>
 
         <div th:if="${section == 'languages' and not #lists.isEmpty(cv.languages)}">

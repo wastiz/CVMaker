@@ -9,6 +9,7 @@ export const DEFAULT_SECTION_ORDER = [
   "projects",
   "education",
   "skills",
+  "strengths",
   "languages",
   "certificates",
 ];
@@ -16,7 +17,10 @@ export const DEFAULT_SECTION_ORDER = [
 function parseSectionOrder(raw?: string): string[] {
   if (!raw) return DEFAULT_SECTION_ORDER;
   const parsed = raw.split(",").map((s) => s.trim()).filter(Boolean);
-  return parsed.length > 0 ? parsed : DEFAULT_SECTION_ORDER;
+  if (parsed.length === 0) return DEFAULT_SECTION_ORDER;
+  // Orders saved before a section existed would hide it forever, so append
+  // anything the stored value predates. Mirrors PdfService.resolveSectionOrder.
+  return [...parsed, ...DEFAULT_SECTION_ORDER.filter((s) => !parsed.includes(s))];
 }
 
 interface CvStore {

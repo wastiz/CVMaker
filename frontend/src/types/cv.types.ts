@@ -23,6 +23,12 @@ export interface CvSkillResponse {
   showType: boolean;
 }
 
+export interface CvStrengthResponse {
+  id: number;
+  name: string;
+  sortOrder: number;
+}
+
 export interface CvLanguageResponse {
   id: number;
   language: string;
@@ -39,6 +45,7 @@ export interface CvExperienceResponse {
   endDate?: string;
   isCurrent: boolean;
   description?: string;
+  bulletPoints?: string[];
   stack?: string[];
   sortOrder: number;
 }
@@ -94,6 +101,7 @@ export interface CvResponse {
   fontFamily: string;
   fontSizePt: number;
   skills: CvSkillResponse[];
+  strengths: CvStrengthResponse[];
   languages: CvLanguageResponse[];
   experience: CvExperienceResponse[];
   projects: CvProjectResponse[];
@@ -155,6 +163,11 @@ export interface CvSkillRequest {
   showType: boolean;
 }
 
+export interface CvStrengthRequest {
+  name: string;
+  sortOrder: number;
+}
+
 export interface CvLanguageRequest {
   language: string;
   level: string;
@@ -169,6 +182,7 @@ export interface CvExperienceRequest {
   endDate?: string;
   isCurrent: boolean;
   description?: string;
+  bulletPoints?: string[];
   stack?: string[];
   sortOrder?: number;
 }

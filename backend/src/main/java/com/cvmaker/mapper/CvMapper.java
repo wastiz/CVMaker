@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
         componentModel = "spring",
         uses = {
                 CvSkillMapper.class,
+                CvStrengthMapper.class,
                 CvLanguageMapper.class,
                 CvExperienceMapper.class,
                 CvProjectMapper.class,
@@ -20,6 +21,7 @@ import org.mapstruct.Mapping;
 public interface CvMapper {
 
     @Mapping(target = "skills", source = "skills")
+    @Mapping(target = "strengths", source = "strengths")
     @Mapping(target = "languages", source = "languages")
     @Mapping(target = "experiences", source = "experiences")
     @Mapping(target = "projects", source = "projects")

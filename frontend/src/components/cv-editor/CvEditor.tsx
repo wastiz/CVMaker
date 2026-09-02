@@ -20,6 +20,7 @@ import { AppearanceSectionCard } from "./AppearanceSectionCard";
 import { PersonalInfoSection } from "./sections/PersonalInfoSection";
 import { SummarySection } from "./sections/SummarySection";
 import { SkillsSection } from "./sections/SkillsSection";
+import { StrengthsSection } from "./sections/StrengthsSection";
 import { LanguagesSection } from "./sections/LanguagesSection";
 import { ExperienceSection } from "./sections/ExperienceSection";
 import { ProjectsSection } from "./sections/ProjectsSection";
@@ -30,10 +31,8 @@ import { SortableSection } from "./SortableSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCvStore } from "@/store/cvStore";
 import { cvApi } from "@/api/cvApi";
+import { A4_WIDTH, A4_HEIGHT, paginateWhenReady } from "@/lib/previewPagination";
 import type { CvResponse } from "@/types/cv.types";
-
-const A4_WIDTH = 794;
-const A4_HEIGHT = 1123;
 
 function renderSection(key: string, cv: CvResponse) {
   switch (key) {
@@ -41,6 +40,7 @@ function renderSection(key: string, cv: CvResponse) {
     case "projects":   return <ProjectsSection cv={cv} />;
     case "education":  return <EducationSection cv={cv} />;
     case "skills":     return <SkillsSection cv={cv} />;
+    case "strengths":  return <StrengthsSection cv={cv} />;
     case "languages":  return <LanguagesSection cv={cv} />;
     case "certificates": return <CertificatesSection cv={cv} />;
     default: return null;
@@ -92,12 +92,19 @@ export function CvEditor({ cv }: Props) {
       .finally(() => setPreviewLoading(false));
   }, [previewTimestamp, cv.id]);
 
-  function handleFirstPageLoad(e: SyntheticEvent<HTMLIFrameElement>) {
+  /**
+   * Every sheet is its own iframe holding the same document, so each one has to
+   * be paginated. Pagination is deterministic, so only the first sheet reports
+   * the resulting size back — the rest just lay themselves out identically.
+   */
+  function handlePageLoad(e: SyntheticEvent<HTMLIFrameElement>, isFirst: boolean) {
     const doc = e.currentTarget.contentDocument;
     if (!doc) return;
-    const height = doc.documentElement.scrollHeight;
-    setContentHeight(height);
-    setPageCount(Math.max(1, Math.ceil(height / A4_HEIGHT)));
+    paginateWhenReady(doc, ({ pageCount: pages, height }) => {
+      if (!isFirst) return;
+      setContentHeight(height);
+      setPageCount(pages);
+    });
   }
 
   function handleSectionDragEnd(event: DragEndEvent) {
@@ -184,7 +191,7 @@ export function CvEditor({ cv }: Props) {
                 }}
                 title={`CV Preview — page ${index + 1}`}
                 sandbox="allow-same-origin"
-                onLoad={index === 0 ? handleFirstPageLoad : undefined}
+                onLoad={(e) => handlePageLoad(e, index === 0)}
               />
             </div>
           ))}

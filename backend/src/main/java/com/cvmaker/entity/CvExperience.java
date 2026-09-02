@@ -46,6 +46,10 @@ public class CvExperience {
     private String description;
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "bullet_points", columnDefinition = "jsonb")
+    private List<String> bulletPoints;
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private List<String> stack;
 

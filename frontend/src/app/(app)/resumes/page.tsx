@@ -199,7 +199,7 @@ function CvCard({
       >
         <div className="h-1.5 w-full bg-gradient-to-r from-primary/60 to-primary/30 shrink-0" />
         <div className="flex flex-col flex-1 px-4 pt-4 pb-3 min-h-0">
-          <h3 className="font-semibold text-sm leading-snug truncate">{cv.title}</h3>
+          <h3 className="font-semibold text-sm leading-snug">{cv.title}</h3>
           {fullName ? (
             <p className="mt-1 text-xs text-muted-foreground truncate">{fullName}</p>
           ) : (

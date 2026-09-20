@@ -44,7 +44,7 @@ function CoverLetterCard({
         <FileText className="size-5 text-muted-foreground" />
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="truncate text-sm font-medium">{letter.title}</h3>
+        <h3 className="text-sm font-medium">{letter.title}</h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {formatRelativeDate(letter.updatedAt)}
         </p>

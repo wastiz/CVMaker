@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Copy, Download, FileJson, FileText, Trash2, Globe, Upload } from "lucide-react";
+import { Plus, Pencil, Copy, Download, FileJson, FileText, Trash2, Globe, Upload, Search, Braces, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,23 +24,15 @@ import { Badge } from "@/components/ui/badge";
 import { cvApi } from "@/api/cvApi";
 import type { CvSummaryResponse } from "@/types/cv.types";
 import { downloadCvJson, importCvFromFile, CvImportError } from "@/lib/cvExportImport";
+import { JsonTemplateModal } from "@/components/resumes/JsonTemplateModal";
+import { TEMPLATES, filterCvs, languageLabel, templateLabel } from "@/lib/cvMeta";
 import { cn } from "@/lib/utils";
-
-const TEMPLATES = [
-  { id: "classic", name: "Classic", description: "Traditional single-column layout" },
-  { id: "minimal", name: "Minimal", description: "Clean design with generous whitespace" },
-  { id: "sidebar", name: "Sidebar", description: "Two-column layout with sidebar" },
-] as const;
 
 function formatRelativeDate(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
   if (diff === 0) return "Updated today";
   if (diff === 1) return "Updated yesterday";
   return `Updated ${diff} days ago`;
-}
-
-function templateLabel(id: string): string {
-  return TEMPLATES.find((t) => t.id === id)?.name ?? id;
 }
 
 
@@ -163,14 +155,6 @@ function DeleteDialog({
   );
 }
 
-const LANGUAGE_LABELS: Record<string, string> = {
-  en: "English",
-  ru: "Russian",
-  de: "German",
-  fr: "French",
-  es: "Spanish",
-};
-
 function CvCard({
   cv,
   onEdit,
@@ -187,9 +171,7 @@ function CvCard({
   onDelete: () => void;
 }) {
   const fullName = [cv.firstName, cv.lastName].filter(Boolean).join(" ");
-  const langLabel = cv.templateLanguage
-    ? (LANGUAGE_LABELS[cv.templateLanguage] ?? cv.templateLanguage.toUpperCase())
-    : null;
+  const langLabel = cv.templateLanguage ? languageLabel(cv.templateLanguage) : null;
 
   return (
     <div className="group flex flex-col" style={{ aspectRatio: "210 / 297" }}>
@@ -313,6 +295,8 @@ export default function ResumesPage() {
   const [cvs, setCvs] = useState<CvSummaryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [showJsonTemplate, setShowJsonTemplate] = useState(false);
+  const [query, setQuery] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; title: string } | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -324,6 +308,8 @@ export default function ResumesPage() {
       .catch(() => toast.error("Failed to load resumes"))
       .finally(() => setIsLoading(false));
   }, []);
+
+  const filtered = useMemo(() => filterCvs(cvs, query), [cvs, query]);
 
   async function handleCreate(title: string, templateId: string) {
     const { data } = await cvApi.create({ title, templateId });
@@ -405,6 +391,17 @@ export default function ResumesPage() {
     />
   );
 
+  const jsonTemplateModal = (
+    <JsonTemplateModal
+      open={showJsonTemplate}
+      onClose={() => setShowJsonTemplate(false)}
+      onImported={(cv) => {
+        setShowJsonTemplate(false);
+        router.push(`/resumes/${cv.id}`);
+      }}
+    />
+  );
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -441,10 +438,15 @@ export default function ResumesPage() {
               <Upload className="size-4 mr-1.5" />
               {isImporting ? "Importing…" : "Import JSON"}
             </Button>
+            <Button variant="outline" onClick={() => setShowJsonTemplate(true)}>
+              <Braces className="size-4 mr-1.5" />
+              JSON template
+            </Button>
           </div>
         </div>
 
         {importInput}
+        {jsonTemplateModal}
         <CreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreate={handleCreate} />
       </div>
     );
@@ -452,26 +454,63 @@ export default function ResumesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">My Resumes</h1>
-        <Button variant="outline" size="sm" onClick={handleImportClick} disabled={isImporting}>
-          <Upload className="size-3.5 mr-1.5" />
-          {isImporting ? "Importing…" : "Import JSON"}
-        </Button>
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <div className="relative w-full max-w-xs">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search resumes…"
+              aria-label="Search resumes"
+              className="h-8 pl-8 pr-8"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
+          </div>
+          <Button variant="outline" size="sm" onClick={handleImportClick} disabled={isImporting}>
+            <Upload className="size-3.5 mr-1.5" />
+            {isImporting ? "Importing…" : "Import JSON"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowJsonTemplate(true)}>
+            <Braces className="size-3.5 mr-1.5" />
+            JSON template
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-        {/* New Resume card — always first, same A4 proportions */}
-        <button
-          onClick={() => setShowCreate(true)}
-          style={{ aspectRatio: "210 / 297" }}
-          className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-transparent text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted/30 hover:text-foreground"
-        >
-          <Plus className="size-7" />
-          <span className="text-sm font-medium">New Resume</span>
-        </button>
+      {query && (
+        <p className="text-sm text-muted-foreground">
+          {filtered.length === 0
+            ? "No resumes match your search"
+            : `${filtered.length} of ${cvs.length} resumes`}
+        </p>
+      )}
 
-        {cvs.map((cv) => (
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+        {/* New Resume card — first when browsing; hidden while searching */}
+        {!query && (
+          <button
+            onClick={() => setShowCreate(true)}
+            style={{ aspectRatio: "210 / 297" }}
+            className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-transparent text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted/30 hover:text-foreground"
+          >
+            <Plus className="size-7" />
+            <span className="text-sm font-medium">New Resume</span>
+          </button>
+        )}
+
+        {filtered.map((cv) => (
           <CvCard
             key={cv.id}
             cv={cv}
@@ -485,6 +524,7 @@ export default function ResumesPage() {
       </div>
 
       {importInput}
+      {jsonTemplateModal}
       <CreateModal open={showCreate} onClose={() => setShowCreate(false)} onCreate={handleCreate} />
       <DeleteDialog
         target={deleteTarget}

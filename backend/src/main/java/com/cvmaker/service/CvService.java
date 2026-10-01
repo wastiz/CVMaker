@@ -49,6 +49,7 @@ public class CvService {
                 .otherLink(req.otherLink())
                 .summary(req.summary())
                 .driverLicense(req.driverLicense())
+                .workPermit(req.workPermit())
                 .build();
         cvRepository.save(cv);
         return cvMapper.toResponse(cv);
@@ -76,6 +77,7 @@ public class CvService {
         if (req.otherLink() != null) cv.setOtherLink(req.otherLink());
         if (req.summary() != null) cv.setSummary(req.summary());
         if (req.driverLicense() != null) cv.setDriverLicense(req.driverLicense());
+        if (req.workPermit() != null) cv.setWorkPermit(req.workPermit());
         if (req.sectionOrder() != null) cv.setSectionOrder(req.sectionOrder());
         if (req.templateLanguage() != null) cv.setTemplateLanguage(req.templateLanguage());
         if (req.fontFamily() != null) cv.setFontFamily(req.fontFamily());
@@ -111,6 +113,7 @@ public class CvService {
                 .otherLink(src.getOtherLink())
                 .summary(src.getSummary())
                 .driverLicense(src.getDriverLicense())
+                .workPermit(src.getWorkPermit())
                 .sectionOrder(src.getSectionOrder())
                 .templateLanguage(src.getTemplateLanguage())
                 .fontFamily(src.getFontFamily())

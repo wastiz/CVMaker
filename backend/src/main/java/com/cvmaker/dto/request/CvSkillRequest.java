@@ -1,11 +1,10 @@
 package com.cvmaker.dto.request;
 
-import com.cvmaker.entity.SkillType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record CvSkillRequest(
-        @NotNull SkillType type,
+        @NotBlank @Size(max = 50) String type,
         @NotBlank String name,
         int sortOrder,
         boolean showType

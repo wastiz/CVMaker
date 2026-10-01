@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CvSectionService {
@@ -38,11 +40,21 @@ public class CvSectionService {
 
     // ─── Skills ──────────────────────────────────────────────────────────────
 
+    /**
+     * Custom types the user has already created in any of their CVs. Offered
+     * alongside the built-in list so a type typed once is reusable everywhere.
+     */
+    public List<String> getCustomSkillTypes(Long userId) {
+        return skillRepository.findDistinctTypesByUserId(userId).stream()
+                .filter(t -> !SkillTypes.isBuiltIn(t))
+                .toList();
+    }
+
     @Transactional
     public CvResponse.SkillResponse createSkill(Long userId, Long cvId, CvSkillRequest req) {
         CvProfile cv = owned(userId, cvId);
         CvSkill skill = CvSkill.builder()
-                .cvProfile(cv).type(req.type()).name(req.name()).sortOrder(req.sortOrder())
+                .cvProfile(cv).type(SkillTypes.normalize(req.type())).name(req.name()).sortOrder(req.sortOrder())
                 .showType(req.showType())
                 .build();
         return skillMapper.toResponse(skillRepository.save(skill));
@@ -54,7 +66,7 @@ public class CvSectionService {
         CvSkill skill = skillRepository.findById(skillId)
                 .filter(s -> s.getCvProfile().getId().equals(cvId))
                 .orElseThrow(() -> new EntityNotFoundException("Skill " + skillId + " not found"));
-        skill.setType(req.type());
+        skill.setType(SkillTypes.normalize(req.type()));
         skill.setName(req.name());
         skill.setSortOrder(req.sortOrder());
         skill.setShowType(req.showType());

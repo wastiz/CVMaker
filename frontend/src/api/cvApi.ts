@@ -37,6 +37,7 @@ export const cvApi = {
   getPreview: (id: number) => api.get<string>(`/api/pdf/${id}/preview`, { responseType: "text" }),
 
   // Skills
+  listCustomSkillTypes: () => api.get<string[]>(`/api/cv/skill-types`),
   createSkill: (cvId: number, data: CvSkillRequest) =>
     api.post<CvSkillResponse>(`/api/cv/${cvId}/skills`, data),
   updateSkill: (cvId: number, id: number, data: CvSkillRequest) =>

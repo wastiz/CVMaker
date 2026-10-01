@@ -9,11 +9,11 @@ export interface CvSummaryResponse {
   updatedAt: string;
 }
 
-export type SkillTypeKey =
-  | "SOFT" | "MAIN" | "HARD" | "OTHER"
-  | "LANGUAGES" | "FRAMEWORKS" | "FRONTEND" | "BACKEND"
-  | "DATABASES" | "DEVOPS" | "CLOUD" | "TOOLS"
-  | "TESTING" | "ARCHITECTURE" | "METHODOLOGY";
+/**
+ * Free text: a built-in key from `@/lib/skillTypes` or a user-defined label.
+ * Use `skillTypeLabel` / `skillTypeColor` to display one.
+ */
+export type SkillTypeKey = string;
 
 export interface CvSkillResponse {
   id: number;
@@ -96,6 +96,7 @@ export interface CvResponse {
   otherLink?: string;
   summary?: string;
   driverLicense?: string;
+  workPermit?: string;
   sectionOrder?: string;
   templateLanguage?: string;
   fontFamily: string;
@@ -127,6 +128,7 @@ export interface CvCreateRequest {
   otherLink?: string;
   summary?: string;
   driverLicense?: string;
+  workPermit?: string;
 }
 
 export interface CvUpdateRequest {
@@ -143,6 +145,7 @@ export interface CvUpdateRequest {
   otherLink?: string;
   summary?: string;
   driverLicense?: string;
+  workPermit?: string;
   sectionOrder?: string;
   templateLanguage?: string;
   fontFamily?: string;

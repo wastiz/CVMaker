@@ -20,9 +20,9 @@ public class CvSkill {
     @JoinColumn(name = "cv_id", nullable = false)
     private CvProfile cvProfile;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private SkillType type;
+    /** Built-in key (see {@link SkillTypes}) or a user-defined label. */
+    @Column(nullable = false, length = 50)
+    private String type;
 
     @Column(nullable = false)
     private String name;

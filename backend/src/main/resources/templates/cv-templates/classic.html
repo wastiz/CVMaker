@@ -36,6 +36,7 @@
         <span th:if="${cv.email}" class="contact-item"><span th:text="${cv.email}"></span></span>
         <span th:if="${cv.phone}"> · <span class="contact-item"><span th:text="${cv.phone}"></span></span></span>
         <span th:if="${cv.location}"> · <span class="contact-item"><span th:text="${cv.location}"></span></span></span>
+        <span th:if="${cv.workPermit}"> · <span class="contact-item"><span th:text="${cv.workPermit}"></span></span></span>
         <span th:if="${cv.github}"> · <span class="contact-item"><a th:href="${cv.github}" th:text="${cv.github}"></a></span></span>
         <span th:if="${cv.linkedin}"> · <span class="contact-item"><a th:href="${cv.linkedin}" th:text="${cv.linkedin}"></a></span></span>
         <span th:if="${cv.portfolio}"> · <span class="contact-item"><a th:href="${cv.portfolio}" th:text="${cv.portfolio}"></a></span></span>

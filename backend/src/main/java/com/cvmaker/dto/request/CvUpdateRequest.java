@@ -16,6 +16,7 @@ public record CvUpdateRequest(
         String otherLink,
         String summary,
         String driverLicense,
+        String workPermit,
         String sectionOrder,
         @Pattern(regexp = "en|et|ru") String templateLanguage,
         String fontFamily,

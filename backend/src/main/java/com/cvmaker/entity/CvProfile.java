@@ -60,6 +60,9 @@ public class CvProfile {
     @Column(name = "driver_license")
     private String driverLicense;
 
+    @Column(name = "work_permit")
+    private String workPermit;
+
     @Column(name = "section_order", length = 500)
     private String sectionOrder;
 

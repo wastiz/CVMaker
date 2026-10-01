@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { FileText, Briefcase, Mail, LogOut } from "lucide-react";
+import { FileText, Briefcase, Mail, LogOut, BookOpen } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/resumes", label: "Resumes", icon: FileText },
   { href: "/tracker", label: "Tracker", icon: Briefcase },
   { href: "/cover-letters", label: "Cover Letters", icon: Mail },
+  { href: "/tips", label: "Guides", icon: BookOpen },
 ] as const;
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

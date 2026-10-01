@@ -15,8 +15,17 @@ interface Props {
 type PersonalFields = Pick<
   CvResponse,
   "firstName" | "lastName" | "email" | "phone" | "location" |
-  "github" | "linkedin" | "portfolio" | "otherLink" | "driverLicense"
+  "github" | "linkedin" | "portfolio" | "otherLink" | "driverLicense" | "workPermit"
 >;
+
+const WORK_PERMIT_SUGGESTIONS = [
+  "EU citizen",
+  "EU work permit",
+  "Estonian residence permit",
+  "EU Blue Card",
+  "Valid work permit",
+  "Requires visa sponsorship",
+];
 
 export function PersonalInfoSection({ cv }: Props) {
   const { setCv } = useCvStore();
@@ -31,6 +40,7 @@ export function PersonalInfoSection({ cv }: Props) {
     portfolio: cv.portfolio ?? "",
     otherLink: cv.otherLink ?? "",
     driverLicense: cv.driverLicense ?? "",
+    workPermit: cv.workPermit ?? "",
   });
 
   async function handleBlur(field: keyof PersonalFields) {
@@ -43,7 +53,8 @@ export function PersonalInfoSection({ cv }: Props) {
     }
   }
 
-  function field(label: string, key: keyof PersonalFields, placeholder?: string) {
+  function field(label: string, key: keyof PersonalFields, placeholder?: string, suggestions?: string[]) {
+    const listId = suggestions ? `${key}-suggestions` : undefined;
     return (
       <div className="space-y-1.5">
         <Label htmlFor={key} className="text-xs text-muted-foreground font-medium">
@@ -55,7 +66,13 @@ export function PersonalInfoSection({ cv }: Props) {
           onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
           onBlur={() => handleBlur(key)}
           placeholder={placeholder}
+          list={listId}
         />
+        {suggestions && (
+          <datalist id={listId}>
+            {suggestions.map((s) => <option key={s} value={s} />)}
+          </datalist>
+        )}
       </div>
     );
   }
@@ -79,7 +96,10 @@ export function PersonalInfoSection({ cv }: Props) {
         {field("Portfolio", "portfolio", "portfolio.dev")}
         {field("Other Link", "otherLink", "example.com")}
       </div>
-      {field("Driver License", "driverLicense", "B")}
+      <div className="grid grid-cols-2 gap-3">
+        {field("Work Permit", "workPermit", "EU work permit", WORK_PERMIT_SUGGESTIONS)}
+        {field("Driver License", "driverLicense", "B")}
+      </div>
     </div>
   );
 }

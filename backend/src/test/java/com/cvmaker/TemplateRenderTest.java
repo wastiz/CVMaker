@@ -31,7 +31,7 @@ class TemplateRenderTest {
         return new CvResponse(
                 1L, "Test CV", "classic", "Jane", "Doe", "jane@example.com", "+372 1234567",
                 "Tallinn", "github.com/jane", "linkedin.com/in/jane", null, null,
-                "Backend engineer.", "B", null, "en", "inter", 10,
+                "Backend engineer.", "B", "EU work permit", null, "en", "inter", 10,
                 LocalDateTime.now(), LocalDateTime.now(),
                 List.of(new CvResponse.SkillResponse(1L, "LANGUAGES", "Java", 0, true)),
                 List.of(
@@ -81,6 +81,7 @@ class TemplateRenderTest {
             assertTrue(html.contains("Strengths"), template + " is missing the Strengths heading");
             assertTrue(html.contains("Fast learner"), template + " is missing strength items");
             assertTrue(html.contains("Cut response time by 40%"), template + " is missing experience bullets");
+            assertTrue(html.contains("EU work permit"), template + " is missing the work permit");
         }
     }
 }

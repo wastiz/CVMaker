@@ -121,6 +121,10 @@ public class PdfService {
         };
     }
 
+    /**
+     * Built-in type keys get a translated heading; a user's custom type is
+     * printed exactly as they typed it, in whatever language they typed it.
+     */
     private String humanizeSkillType(String type, String lang) {
         return switch (lang) {
             case "ru" -> switch (type) {
@@ -138,6 +142,7 @@ public class PdfService {
                 case "ARCHITECTURE" -> "Архитектура";
                 case "METHODOLOGY"  -> "Методология";
                 case "MAIN"         -> "Основные";
+                case "OTHER"        -> "Прочее";
                 default             -> type;
             };
             case "et" -> switch (type) {
@@ -155,6 +160,7 @@ public class PdfService {
                 case "ARCHITECTURE" -> "Arhitektuur";
                 case "METHODOLOGY"  -> "Metoodika";
                 case "MAIN"         -> "Peamised";
+                case "OTHER"        -> "Muu";
                 default             -> type;
             };
             default -> switch (type) {
@@ -172,6 +178,7 @@ public class PdfService {
                 case "ARCHITECTURE" -> "Architecture";
                 case "METHODOLOGY"  -> "Methodology";
                 case "MAIN"         -> "Main";
+                case "OTHER"        -> "Other";
                 default             -> type;
             };
         };

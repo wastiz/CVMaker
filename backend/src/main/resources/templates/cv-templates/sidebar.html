@@ -40,11 +40,12 @@
     <td class="sidebar">
         <h1 th:text="${cv.firstName} + ' ' + ${cv.lastName}">Full Name</h1>
 
-        <div th:if="${cv.email != null or cv.phone != null or cv.location != null or cv.github != null or cv.linkedin != null or cv.portfolio != null or cv.otherLink != null}">
+        <div th:if="${cv.email != null or cv.phone != null or cv.location != null or cv.workPermit != null or cv.github != null or cv.linkedin != null or cv.portfolio != null or cv.otherLink != null}">
             <h2>Contact</h2>
             <span th:if="${cv.email}" class="contact-item"><span th:text="${cv.email}"></span></span>
             <span th:if="${cv.phone}" class="contact-item"><span th:text="${cv.phone}"></span></span>
             <span th:if="${cv.location}" class="contact-item"><span th:text="${cv.location}"></span></span>
+            <span th:if="${cv.workPermit}" class="contact-item"><span th:text="${cv.workPermit}"></span></span>
             <span th:if="${cv.github}" class="contact-item"><a th:href="${cv.github}" th:text="${cv.github}"></a></span>
             <span th:if="${cv.linkedin}" class="contact-item"><a th:href="${cv.linkedin}" th:text="${cv.linkedin}"></a></span>
             <span th:if="${cv.portfolio}" class="contact-item"><a th:href="${cv.portfolio}" th:text="${cv.portfolio}"></a></span>

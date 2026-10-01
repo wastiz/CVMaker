@@ -26,6 +26,12 @@ export default function LandingPage() {
             Login
           </Link>
         </div>
+        <p className="text-sm text-muted-foreground">
+          New to this? Read our{" "}
+          <Link href="/tips/resume" className="underline underline-offset-4 hover:text-foreground">resume guide</Link>
+          {" "}and{" "}
+          <Link href="/tips/cover-letter" className="underline underline-offset-4 hover:text-foreground">cover letter guide</Link>.
+        </p>
       </div>
     </main>
   );

@@ -20,6 +20,7 @@ public record CvResponse(
         String otherLink,
         String summary,
         String driverLicense,
+        String workPermit,
         String sectionOrder,
         String templateLanguage,
         String fontFamily,

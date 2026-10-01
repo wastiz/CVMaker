@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/cv")
 @RequiredArgsConstructor
@@ -19,6 +21,12 @@ public class CvSectionController {
     private final CvSectionService sectionService;
 
     // ─── Skills ──────────────────────────────────────────────────────────────
+
+    /** The user's own custom skill types, for the type dropdown in the editor. */
+    @GetMapping("/skill-types")
+    public ResponseEntity<List<String>> listCustomSkillTypes(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(sectionService.getCustomSkillTypes(user.getId()));
+    }
 
     @PostMapping("/{cvId}/skills")
     public ResponseEntity<CvResponse.SkillResponse> createSkill(

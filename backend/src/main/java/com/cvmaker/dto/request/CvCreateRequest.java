@@ -15,5 +15,6 @@ public record CvCreateRequest(
         String portfolio,
         String otherLink,
         String summary,
-        String driverLicense
+        String driverLicense,
+        String workPermit
 ) {}
